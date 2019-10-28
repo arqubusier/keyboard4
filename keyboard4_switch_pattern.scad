@@ -1,4 +1,4 @@
-include <../switchholder/cherrymx.scad>
+include <../switcholder/cherrymx.scad>
 
 
 module column(n) {
@@ -26,7 +26,7 @@ thumb_z_angle1 = 14;
 thumb_radius2 = 65;
 thumb_z_offset2 = 5;
 thumb_z_angle2 = 19.2;
-thumb_y_angle = 80;
+thumb_y_angle = 73;
 thumb_x_angle = 15;
 
 module thumb_row(angle, radius, n) {
@@ -39,7 +39,7 @@ module thumb_row(angle, radius, n) {
 
 rotate(-thumb_y_angle, v=[0,1,0])
 rotate(thumb_x_angle, v=[1,0,0])
-    translate([-2, -0.4*switch_side_outer -1 -thumb_radius1, switch_side_outer]) {
+    translate([-2, -1*switch_side_outer -1 -thumb_radius1, 0*switch_side_outer + 1]) {
 	    thumb_row(thumb_z_angle1, thumb_radius1, 4);
 	    translate([0, 0, -thumb_z_offset2])
 		rotate(2, v=[0,0,1])
