@@ -25,8 +25,10 @@ thumb_radius1 = 86;
 thumb_z_angle1 = 14;
 thumb_radius2 = 65;
 thumb_z_offset2 = 5;
+thumb_radius3 = 66;
 thumb_z_angle2 = 19.2;
-thumb_y_angle = 73;
+thumb_z_angle3 = 19.3;
+thumb_y_angle = 60;
 thumb_x_angle = 10;
 
 module thumb_row(angle, radius, n) {
@@ -37,14 +39,16 @@ module thumb_row(angle, radius, n) {
     }
 }
 
-translate([7.5, 1.5, -0.3]) {
-rotate(-thumb_y_angle, v=[0,1,0])
-rotate(thumb_x_angle, v=[1,0,0])
-	    translate([11.0, -1*switch_side_outer -1 -thumb_radius1, 0*switch_side_outer + 1]) {
-		rotate(13, v=[0,0,1])
-		    thumb_row(thumb_z_angle1, thumb_radius1, 3);
-	    translate([0, 0, -thumb_z_offset2])
-		rotate(7, v=[0,0,1])
-		    thumb_row(thumb_z_angle2, thumb_radius2, 3);
-    }
-}
+translate([7.5, 1.5, -0.3])
+    rotate(-thumb_y_angle, v=[0,1,0])
+	rotate(thumb_x_angle, v=[1,0,0])
+		translate([11.0, -1*switch_side_outer -1 -thumb_radius1, 0*switch_side_outer + 1]) {
+		    rotate(13, v=[0,0,1])
+			thumb_row(thumb_z_angle1, thumb_radius1, 3);
+		    rotate(7, v=[0,0,1])
+			translate([0, 0, -thumb_z_offset2])
+				thumb_row(thumb_z_angle2, thumb_radius2, 3);
+		    rotate(19, v=[0,0,1])
+			translate([0, 42, +thumb_z_offset2])
+				thumb_row(thumb_z_angle2, thumb_radius3, 2);
+		}
