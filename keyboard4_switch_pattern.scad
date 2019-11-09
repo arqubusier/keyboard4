@@ -1,13 +1,27 @@
 include <../switcholder/cherrymx.scad>
 
 
-module column(n,radius,radius_offset,angle) {
+module column_rep(n,radius,radius_offset,angle) {
     translate([0,0,radius])
         for (row = [0:n-1] ) {
                 rotate(row*angle-(n-1.5)/2*angle+radius_offset, [1,0,0])
                     translate([0, 0, -radius])
-                        switch();
+                        children();
         }
+}
+
+module column(n,radius,radius_offset,angle) {
+    difference() {
+        hull()
+            column_rep(n,radius,radius_offset,angle)
+                        switch_pos();
+        hull()
+            translate([0,0,height])
+                    column_rep(n,radius-height,radius_offset,angle)
+                        switch_pos();
+        column_rep(n,radius-height,radius_offset,angle)
+            switch_neg();
+    }
 }
 
 
