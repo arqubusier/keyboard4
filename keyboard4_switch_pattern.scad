@@ -20,7 +20,7 @@ module column(n,radius,radius_offset,angle) {
                     column_rep(n,radius-height,radius_offset,angle)
                         switch_pos();
         column_rep(n,radius-height,radius_offset,angle)
-            switch_neg();
+            switch_neg(2);
     }
 }
 
@@ -89,53 +89,77 @@ module matrix_rep(row_numbers, radius, offs, columnHull) {
     }
 }
 
-bottom_corners = [ [-10,-58,0], [-40,0,0], [-10,50,0], [70,50,0], [10,-53,0], [70,-53,0] ] ;
+//corners = [ [-10,-58,0], [-40,0,0], [-10,50,0], [70,50,0], [10,-53,0], [70,-53,0] ] ;
+corners = [ [-10,-58], [-40,0], [-10,50], [76,50], [76,-53], [10,-53] ] ;
 
         //translate([0,0,height/2+5.5])
         //    rotate(90, [1,0,0])
         //        import("../DSA_Keycap_Set_8mm/files/DSA_1u.stl");
 
-difference() {
-hull(){
-        row_numbers = [4,5,5,5,5];
-        matrix_rep(row_numbers, column_radius, [0,0,0],false)
-            switch_pos();
-
-
-        translate(common_offset) {
-        rotate(common_rotate_y, [0,1,0]) {
-        translate([-2 -0.5*switch_side_outer, -23, -3 -1.5*switch_side_outer - 0.5*height]){
-                    rotate(-13, v=[1,0,0]) {
-                                translate([-thumb_height_diff, 0.5*switch_side_outer, 2])
-                                    rotate(-thumb_flattness_angle, v=[0,1,0])
-                                        rotate(thumb_out_angle+12, v=[1,0,0])
-                                            thumb_row(0, 0, 2);
-                                translate([0,-0.5*switch_side_outer,0])
-                                    rotate(-thumb_flattness_angle, v=[0,1,0])
-                                        rotate(thumb_out_angle, v=[1,0,0])
-                                            thumb_row(0, 0, 2);
-                                translate([+thumb_height_diff, -1.5*switch_side_outer, 0])
-                                    rotate(-thumb_flattness_angle, v=[0,1,0])
-                                        rotate(thumb_out_angle-12, v=[1,0,0])
-                                                thumb_row(0, 0, 2);
-                    }
+/*
+translate(common_offset) {
+rotate(common_rotate_y, [0,1,0]) {
+translate([-2 -0.5*switch_side_outer, -23, -3 -1.5*switch_side_outer - 0.5*height]){
+            rotate(-13, v=[1,0,0]) {
+                        translate([-thumb_height_diff, 0.5*switch_side_outer, 2])
+                            rotate(-thumb_flattness_angle, v=[0,1,0])
+                                rotate(thumb_out_angle+12, v=[1,0,0])
+                                    thumb_row(0, 0, 2);
+                        translate([0,-0.5*switch_side_outer,0])
+                            rotate(-thumb_flattness_angle, v=[0,1,0])
+                                rotate(thumb_out_angle, v=[1,0,0])
+                                    thumb_row(0, 0, 2);
+                        translate([+thumb_height_diff, -1.5*switch_side_outer, 0])
+                            rotate(-thumb_flattness_angle, v=[0,1,0])
+                                rotate(thumb_out_angle-12, v=[1,0,0])
+                                        thumb_row(0, 0, 2);
             }
-        }
+    }
+}
+}
+*/
+
+row_numbers = [4,5,5,5,5];
+difference(){
+    union() {
+        difference() {
+            //outer
+            hull(){
+                matrix_rep(row_numbers, column_radius, [0,0,0],false)
+                    switch_pos();
+
+                linear_extrude(2)
+                    offset(r=1.5)
+                    polygon(corners);
+            }
+
+            //inner
+            hull(){
+                row_numbers = [4,5,5,5,5];
+                matrix_rep(row_numbers, column_radius, [0,0,0],false)
+                    switch_neg(1);
+
+                linear_extrude(2)
+                    offset(r=-1.5)
+                    polygon(corners);
+            }
+
+
         }
 
-    #for (p=bottom_corners) {
-        translate(p)
-            cylinder(d=10,h=2);
-    }
+        difference() {
+            hull()
+                matrix_rep(row_numbers, column_radius, [0,0,0],true)
+                    switch_pos();
+            matrix_rep(row_numbers, column_radius - height, [0,0,0],false)
+                switch_neg(10);
+        }
     }
 
-    for (i = [1:4]) {
-        row_numbers = [5,7,7,7,6];
-        #matrix_rep(row_numbers, column_radius - i*height, [0,0,i*height],true)
+    for (i = [1:1]) {
+        row_numbers_minus = [5,7,7,7,6];
+        #matrix_rep(row_numbers_minus, column_radius - i*height, [0,0,i*height],true)
             switch_pos();
     }
 
-    row_numbers = [4,5,5,5,5];
-    matrix_rep(row_numbers, column_radius - height, [0,0,0],false)
-        switch_neg();
 }
