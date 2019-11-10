@@ -18,25 +18,25 @@ bottom_height = 2;
 
 /*****************************************************************************/
 
-module column_rep(n,radius,radius_offset,angle) {
+module column_rep(n,radius,angle_offset,angle) {
     translate([0,0,radius])
         for (row = [0:n-1] ) {
-                rotate(row*angle-(n-1.5)/2*angle+radius_offset, [1,0,0])
+                rotate(row*angle-(n-1.5)/2*angle+angle_offset, [1,0,0])
                     translate([0, 0, -radius])
                         children();
         }
 }
 
-module column(n,radius,radius_offset,angle) {
+module column(n,radius,angle_offset,angle) {
     difference() {
         hull()
-            column_rep(n,radius,radius_offset,angle)
+            column_rep(n,radius,angle_offset,angle)
                         switch_pos();
         hull()
             translate([0,0,height])
-                    column_rep(n,radius-height,radius_offset,angle)
+                    column_rep(n,radius-height,angle_offset,angle)
                         switch_pos();
-        column_rep(n,radius-height,radius_offset,angle)
+        column_rep(n,radius-height,angle_offset,angle)
             switch_neg(2);
     }
 }
@@ -52,7 +52,7 @@ module matrix_rep(row_numbers, radius, offs, columnHull) {
         column_y_offsets = [0,4,9,4,-9];
         column_z_offsets = [0,0,-4,0,7];
         column_angle = 17;
-        column_radii_offset = [2,0,0,0,0];
+        column_angle_offset = [2,0,0,0,column_angle/2];
         column_x_sep = 0;
 
 
@@ -64,7 +64,7 @@ module matrix_rep(row_numbers, radius, offs, columnHull) {
                     translate(offs)
                         translate([col_i*(column_x_sep + switch_side_outer),
                             column_y_offsets[col_i], column_z_offsets[col_i]])
-                                    column_rep(row_numbers[col_i],radius,column_radii_offset[col_i],
+                                    column_rep(row_numbers[col_i],radius,column_angle_offset[col_i],
                                             column_angle)
                                         children();
                     }
@@ -72,7 +72,7 @@ module matrix_rep(row_numbers, radius, offs, columnHull) {
                     translate(offs)
                         translate([col_i*(column_x_sep + switch_side_outer),
                             column_y_offsets[col_i], column_z_offsets[col_i]])
-                                    column_rep(row_numbers[col_i],radius,column_radii_offset[col_i],
+                                    column_rep(row_numbers[col_i],radius,column_angle_offset[col_i],
                                             column_angle)
                                         children();
                 }
@@ -153,7 +153,7 @@ module thumb_outer () {
     hull() {
 	thumb_cluster_rep(0)
 		switch_pos();
-	#bottom_plate(bottom_height, thumb_corners, 1.5);
+	bottom_plate(bottom_height, thumb_corners, 1.5);
     }
 }
 
@@ -179,7 +179,7 @@ module thumb_keys () {
 module thumb_keys_excess() {
     // Trim excess above switch holes
     for (i=[1:3])
-	#thumb_cluster_rep(-i*height)
+	thumb_cluster_rep(-i*height)
 	    switch_pos();
 }
 
@@ -191,7 +191,7 @@ module thumb_keys_excess() {
 /*****************************************************************************/
 
 main_corners = [ [-5,-40], [-10,35], [0,60], [76,60], [76,-55], [20,-55] ] ;
-row_numbers = [4,5,5,5,5];
+row_numbers = [4,5,5,5,4];
 
 module main_outer() {
     //outer body
@@ -215,7 +215,7 @@ module main_inner() {
 
 module main_keys() {
     // Connected Switch holes with excess above
-    #difference() {
+    difference() {
         hull()
     	matrix_rep(row_numbers, column_radius, [0,0,0],true)
     	    switch_pos();
