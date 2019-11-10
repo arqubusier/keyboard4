@@ -25,14 +25,6 @@ module column(n,radius,radius_offset,angle) {
 }
 
 
-module thumb_row(angle, radius, n) {
-    for (i = [0:n-1]) {
-            rotate(i*-angle, v=[0, 1, 0])
-                translate([i*switch_side_outer, 0 + radius, 0])
-                        switch();
-    }
-}
-
 column_radii = 72;
 
 // Common
@@ -40,20 +32,7 @@ common_offset = [0,0,34];
 common_rotate_y = 20;
 
 // Main part
-column_radius = 72;;;;
-
-// Thumb cluster
-
-thumb_radius1 = 0;
-thumb_z_angle1 = 0;
-thumb_radius2 = 0;
-thumb_height_diff = 10;
-thumb_radius3 = 0;
-thumb_z_angle2 = 0;
-thumb_z_angle3 = 0;
-thumb_flattness_angle = 75;
-thumb_x_angle = 0;
-thumb_out_angle = 22;
+column_radius = 72;
 
 module matrix_rep(row_numbers, radius, offs, columnHull) {
         n_columns=5;
@@ -89,36 +68,105 @@ module matrix_rep(row_numbers, radius, offs, columnHull) {
     }
 }
 
-//corners = [ [-10,-58,0], [-40,0,0], [-10,50,0], [70,50,0], [10,-53,0], [70,-53,0] ] ;
 corners = [ [-10,-58], [-40,0], [-10,60], [76,60], [76,-53], [10,-53] ] ;
 
         //translate([0,0,height/2+5.5])
         //    rotate(90, [1,0,0])
         //        import("../DSA_Keycap_Set_8mm/files/DSA_1u.stl");
 
-/*
-translate(common_offset) {
-    rotate(common_rotate_y, [0,1,0]) {
-        translate([-2 -0.5*switch_side_outer, -23, -3 -1.5*switch_side_outer - 0.5*height]){
-                    rotate(-13, v=[1,0,0]) {
-                                translate([-thumb_height_diff, 0.5*switch_side_outer, 2])
-                                    rotate(-thumb_flattness_angle, v=[0,1,0])
-                                        rotate(thumb_out_angle+12, v=[1,0,0])
-                                            thumb_row(0, 0, 2);
-                                translate([0,-0.5*switch_side_outer,0])
-                                    rotate(-thumb_flattness_angle, v=[0,1,0])
-                                        rotate(thumb_out_angle, v=[1,0,0])
-                                            thumb_row(0, 0, 2);
-                                translate([+thumb_height_diff, -1.5*switch_side_outer, 0])
-                                    rotate(-thumb_flattness_angle, v=[0,1,0])
-                                        rotate(thumb_out_angle-12, v=[1,0,0])
-                                                thumb_row(0, 0, 2);
-                    }
-            }
+
+module thumb_row_rep(out_angle, flatness_angle, in_offs, up_offs, forward_offs, n) {
+    for (i = [0:n-1]) {
+        translate([in_offs, 0.5*switch_side_outer + forward_offs, up_offs])
+            rotate(-flatness_angle+10, v=[0,1,0])
+                rotate(out_angle, v=[1,0,0])
+                        translate([i*switch_side_outer, 0, 0])
+                            children();
     }
+}
+
+
+module thumb_cluster_rep(in_offs) {
+    // Thumb cluster
+
+    thumb_radius1 = 0;
+    thumb_z_angle1 = 0;
+    thumb_radius2 = 0;
+    thumb_height_diff = 10;
+    thumb_radius3 = 0;
+    thumb_z_angle2 = 0;
+    thumb_z_angle3 = 0;
+    thumb_flattness_angle = 95;
+    thumb_x_angle = 0;
+    thumb_out_angle = 22;
+    translate(common_offset) {
+        rotate(common_rotate_y, [0,1,0]) {
+            translate([-2 -0.5*switch_side_outer, -23, -3 -1.5*switch_side_outer - 0.5*height]){
+                rotate(-13, v=[1,0,0]) {
+                    thumb_row_rep( thumb_out_angle + 12, thumb_flattness_angle,
+                                    in_offs-thumb_height_diff, 2, 0.5*switch_side_outer, 2)
+                                    children();
+                    thumb_row_rep( thumb_out_angle, thumb_flattness_angle,
+                                    in_offs, 0, -0.5*switch_side_outer, 2)
+                                    children();
+                    thumb_row_rep( thumb_out_angle - 12, thumb_flattness_angle,
+                                    in_offs+thumb_height_diff, 0, -1.5*switch_side_outer, 2)
+                                    children();
+                        }
+                }
+        }
+    }
+}
+
+/*
+thumb_cluster_rep(0)
+    switch_pos();
+    */
+/*
+difference() {
+    //outer
+    hull() {
+        hull()
+            thumb_cluster_rep(0)
+                switch_pos();
+
+        linear_extrude(2)
+            offset(r=1.5)
+            polygon(corners);
+    }
+
+    //inner
+    hull() {
+        thumb_cluster_rep(-height)
+            switch_neg(1);
+
+        linear_extrude(2)
+            offset(r=-1.5)
+            polygon(corners);
+    }
+
+
+    for (i=[0:1])
+        hull()
+            thumb_cluster_rep(i*height)
+                switch_pos();
 }
 */
 
+/*
+difference() {
+    hull()
+        thumb_cluster_rep(0)
+            switch_pos();
+    thumb_cluster_rep(0)
+        switch_neg(3);
+    #hull()
+        thumb_cluster_rep(height)
+            switch_pos();
+}
+*/
+
+/*
 row_numbers = [4,5,5,5,5];
 difference(){
     union() {
@@ -163,3 +211,4 @@ difference(){
     }
 
 }
+*/
