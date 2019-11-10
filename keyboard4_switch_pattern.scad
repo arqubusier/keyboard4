@@ -1,5 +1,22 @@
 include <../switcholder/cherrymx.scad>
 
+/******************************************************************************
+
+		Common
+
+/*****************************************************************************/
+
+// Common
+common_offset = [0,0,34];
+common_rotate_y = 20;
+
+bottom_height = 2;
+
+/******************************************************************************
+
+		Main Columns
+
+/*****************************************************************************/
 
 module column_rep(n,radius,radius_offset,angle) {
     translate([0,0,radius])
@@ -26,12 +43,6 @@ module column(n,radius,radius_offset,angle) {
 
 
 column_radii = 72;
-
-// Common
-common_offset = [0,0,34];
-common_rotate_y = 20;
-
-bottom_height = 2;
 
 // Main part
 column_radius = 72;
@@ -76,6 +87,11 @@ corners = [ [-5,-58], [-35,0], [-10,60], [76,60], [76,-53], [10,-53] ] ;
         //    rotate(90, [1,0,0])
         //        import("../DSA_Keycap_Set_8mm/files/DSA_1u.stl");
 
+/******************************************************************************
+
+		Thumb Columns
+
+/*****************************************************************************/
 
 module thumb_row_rep(out_angle, flatness_angle, in_offs, up_offs, forward_offs, n) {
     for (i = [0:n-1]) {
@@ -126,23 +142,30 @@ module bottom_plate(height, points, r) {
             polygon(points);
 }
 
-difference() {
-    union() {
-    	difference() {
-	    //outer body
-	    hull() {
-		thumb_cluster_rep(0)
-			switch_pos();
-		bottom_plate(bottom_height, corners, 1.5);
-	    }
+/******************************************************************************
 
-	    //inner body
-	    hull() {
-		thumb_cluster_rep(0)
-		    switch_neg(1);
-		bottom_plate(bottom_height*2, corners, -1.5);
-	    }
-	}
+		Thumb Region
+
+/*****************************************************************************/
+
+module thumb_outer () {
+    //outer body
+    hull() {
+	thumb_cluster_rep(0)
+		switch_pos();
+	bottom_plate(bottom_height, corners, 1.5);
+    }
+}
+
+module thumb_inner () {
+    hull() {
+	thumb_cluster_rep(0)
+	    switch_neg(1);
+	bottom_plate(bottom_height*2, corners, -1.5);
+    }
+}
+
+module thumb_keys () {
 	// Connected Switch holes with excess above
 	difference() {
 	    hull()
@@ -151,56 +174,79 @@ difference() {
 	    thumb_cluster_rep(0)
 		switch_neg(3);
 	}
-    }
+}
 
+module thumb_keys_excess() {
     // Trim excess above switch holes
     for (i=[1:3])
 	#thumb_cluster_rep(-i*height)
 	    switch_pos();
 }
 
-//thumb keys
 
-/*
+/******************************************************************************
+
+		Main Region
+
+/*****************************************************************************/
+
 row_numbers = [4,5,5,5,5];
-difference(){
-    union() {
-        difference() {
-            //outer body
-            hull(){
-                matrix_rep(row_numbers, column_radius, [0,0,0],false)
-                    switch_pos();
 
-		bottom_plate(bottom_height, corners, 1.5);
-            }
+module main_outer() {
+    //outer body
+    hull(){
+	matrix_rep(row_numbers, column_radius, [0,0,0],false)
+	    switch_pos();
 
-            //inner body
-            hull(){
-                matrix_rep(row_numbers, column_radius, [0,0,0],false)
-                    switch_neg(1);
+	bottom_plate(bottom_height, corners, 1.5);
+    }
+}
 
-		bottom_plate(bottom_height, corners, -1.5);
-            }
+module main_inner() {
+    //inner body
+    hull(){
+	matrix_rep(row_numbers, column_radius, [0,0,0],false)
+	    switch_neg(1);
 
+	bottom_plate(bottom_height, corners, -1.5);
+    }
+}
 
-        }
-
-	// Connected Switch holes with excess above
-        #difference() {
-            hull()
-                matrix_rep(row_numbers, column_radius, [0,0,0],true)
-                    switch_pos();
-            matrix_rep(row_numbers, column_radius - height, [0,0,0],false)
-                switch_neg(10);
-        }
+module main_keys() {
+    // Connected Switch holes with excess above
+    #difference() {
+        hull()
+    	matrix_rep(row_numbers, column_radius, [0,0,0],true)
+    	    switch_pos();
+        matrix_rep(row_numbers, column_radius - height, [0,0,0],false)
+    	switch_neg(10);
     }
 
+}
+
+module main_keys_excess() {
+    row_numbers_minus = row_numbers + [1,2,2,2,6];
     // Trim excess above switch holes
     for (i = [1:1]) {
-        row_numbers_minus = [5,7,7,7,6];
         matrix_rep(row_numbers_minus, column_radius - i*height, [0,0,i*height],true)
             switch_pos();
     }
 
 }
-*/
+
+difference() {
+    union() {
+        difference() {
+            union() {
+                main_outer();
+                thumb_outer();
+            }
+            main_inner();
+            thumb_inner();
+        }
+        main_keys();
+        thumb_keys();
+    }
+    thumb_keys_excess();
+    main_keys_excess();
+}
