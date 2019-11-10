@@ -147,13 +147,13 @@ module bottom_plate(height, points, r) {
 
 /*****************************************************************************/
 
-thumb_corners = [ [-5,-58], [-35,0], [-10,30], [76,60], [76,-45], [10,-53] ] ;
+thumb_corners = [ [-5,-58], [-35,15], [-10,30], [76,40], [76,0], [25,-45] ] ;
 module thumb_outer () {
     //outer body
     hull() {
 	thumb_cluster_rep(0)
 		switch_pos();
-	bottom_plate(bottom_height, thumb_corners, 1.5);
+	#bottom_plate(bottom_height, thumb_corners, 1.5);
     }
 }
 
@@ -190,7 +190,7 @@ module thumb_keys_excess() {
 
 /*****************************************************************************/
 
-main_corners = [ [-5,-40], [-10,35], [0,60], [76,60], [76,-55], [20,-55] ] ;
+main_corners = [ [-5,-40], [-10,35], [0,60], [76,60], [76,-45], [20,-45] ] ;
 row_numbers = [4,5,5,5,4];
 
 module main_outer() {
