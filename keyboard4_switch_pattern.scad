@@ -127,67 +127,66 @@ module bottom_plate(height, points, r) {
 }
 
 difference() {
-    //outer body
-    hull() {
-	thumb_cluster_rep(0)
-		switch_pos();
-	bottom_plate(bottom_height, corners, 1.5);
+    union() {
+    	difference() {
+	    //outer body
+	    hull() {
+		thumb_cluster_rep(0)
+			switch_pos();
+		bottom_plate(bottom_height, corners, 1.5);
+	    }
+
+	    //inner body
+	    hull() {
+		thumb_cluster_rep(0)
+		    switch_neg(1);
+		bottom_plate(bottom_height*2, corners, -1.5);
+	    }
+	}
+	// Connected Switch holes with excess above
+	difference() {
+	    hull()
+		thumb_cluster_rep(0)
+		    switch_pos();
+	    thumb_cluster_rep(0)
+		switch_neg(3);
+	}
     }
 
-    //inner body
-    hull() {
-        thumb_cluster_rep(0)
-            switch_neg(1);
-	bottom_plate(bottom_height*2, corners, -1.5);
-    }
-
+    // Trim excess above switch holes
     for (i=[1:3])
-        #thumb_cluster_rep(-i*height)
-            switch_pos();
+	#thumb_cluster_rep(-i*height)
+	    switch_pos();
 }
 
 //thumb keys
-difference() {
-    hull()
-        thumb_cluster_rep(0)
-            switch_pos();
-    thumb_cluster_rep(0)
-        switch_neg(3);
-    for (i=[1:3])
-        #thumb_cluster_rep(-i*height)
-            switch_pos();
-}
 
 /*
 row_numbers = [4,5,5,5,5];
 difference(){
     union() {
         difference() {
-            //outer
+            //outer body
             hull(){
                 matrix_rep(row_numbers, column_radius, [0,0,0],false)
                     switch_pos();
 
-                linear_extrude(bottom_height)
-                    offset(r=1.5)
-                    polygon(corners);
+		bottom_plate(bottom_height, corners, 1.5);
             }
 
-            //inner
+            //inner body
             hull(){
-                row_numbers = [4,5,5,5,5];
                 matrix_rep(row_numbers, column_radius, [0,0,0],false)
                     switch_neg(1);
 
-                linear_extrude(bottom_height)
-                    offset(r=-1.5)
-                    polygon(corners);
+		bottom_plate(bottom_height, corners, -1.5);
             }
 
 
         }
 
-        difference() {
+	// Connected Switch holes with excess above
+        #difference() {
             hull()
                 matrix_rep(row_numbers, column_radius, [0,0,0],true)
                     switch_pos();
@@ -196,9 +195,10 @@ difference(){
         }
     }
 
+    // Trim excess above switch holes
     for (i = [1:1]) {
         row_numbers_minus = [5,7,7,7,6];
-        #matrix_rep(row_numbers_minus, column_radius - i*height, [0,0,i*height],true)
+        matrix_rep(row_numbers_minus, column_radius - i*height, [0,0,i*height],true)
             switch_pos();
     }
 
