@@ -81,7 +81,6 @@ module matrix_rep(row_numbers, radius, offs, columnHull) {
     }
 }
 
-corners = [ [-5,-58], [-35,0], [-10,60], [76,60], [76,-53], [10,-53] ] ;
 
         //translate([0,0,height/2+5.5])
         //    rotate(90, [1,0,0])
@@ -148,12 +147,13 @@ module bottom_plate(height, points, r) {
 
 /*****************************************************************************/
 
+thumb_corners = [ [-5,-58], [-35,0], [-10,30], [76,60], [76,-45], [10,-53] ] ;
 module thumb_outer () {
     //outer body
     hull() {
 	thumb_cluster_rep(0)
 		switch_pos();
-	bottom_plate(bottom_height, corners, 1.5);
+	#bottom_plate(bottom_height, thumb_corners, 1.5);
     }
 }
 
@@ -161,7 +161,7 @@ module thumb_inner () {
     hull() {
 	thumb_cluster_rep(0)
 	    switch_neg(1);
-	bottom_plate(bottom_height*2, corners, -1.5);
+	bottom_plate(bottom_height*2, thumb_corners, -1.5);
     }
 }
 
@@ -190,6 +190,7 @@ module thumb_keys_excess() {
 
 /*****************************************************************************/
 
+main_corners = [ [-5,-40], [-10,35], [0,60], [76,60], [76,-55], [20,-55] ] ;
 row_numbers = [4,5,5,5,5];
 
 module main_outer() {
@@ -198,7 +199,7 @@ module main_outer() {
 	matrix_rep(row_numbers, column_radius, [0,0,0],false)
 	    switch_pos();
 
-	bottom_plate(bottom_height, corners, 1.5);
+        bottom_plate(bottom_height, main_corners, 1.5);
     }
 }
 
@@ -208,7 +209,7 @@ module main_inner() {
 	matrix_rep(row_numbers, column_radius, [0,0,0],false)
 	    switch_neg(1);
 
-	bottom_plate(bottom_height, corners, -1.5);
+	bottom_plate(bottom_height, main_corners, -1.5);
     }
 }
 
