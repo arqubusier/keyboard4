@@ -31,6 +31,8 @@ column_radii = 72;
 common_offset = [0,0,34];
 common_rotate_y = 20;
 
+bottom_height = 2;
+
 // Main part
 column_radius = 72;
 
@@ -68,7 +70,7 @@ module matrix_rep(row_numbers, radius, offs, columnHull) {
     }
 }
 
-corners = [ [-10,-58], [-40,0], [-10,60], [76,60], [76,-53], [10,-53] ] ;
+corners = [ [-5,-58], [-35,0], [-10,60], [76,60], [76,-53], [10,-53] ] ;
 
         //translate([0,0,height/2+5.5])
         //    rotate(90, [1,0,0])
@@ -88,7 +90,7 @@ module thumb_row_rep(out_angle, flatness_angle, in_offs, up_offs, forward_offs, 
 
 module thumb_cluster_rep(in_offs) {
     // Thumb cluster
-
+    up_offs = 0.2;
     thumb_radius1 = 0;
     thumb_z_angle1 = 0;
     thumb_radius2 = 0;
@@ -101,7 +103,7 @@ module thumb_cluster_rep(in_offs) {
     thumb_out_angle = 22;
     translate(common_offset) {
         rotate(common_rotate_y, [0,1,0]) {
-            translate([-2 -0.5*switch_side_outer, -23, -3 -1.5*switch_side_outer - 0.5*height]){
+            translate([-2 -0.5*switch_side_outer, -23, up_offs-1.5*switch_side_outer - 0.5*height]){
                 rotate(-13, v=[1,0,0]) {
                     thumb_row_rep( thumb_out_angle + 12, thumb_flattness_angle,
                                     in_offs-thumb_height_diff, 2, 0.5*switch_side_outer, 2)
@@ -118,29 +120,24 @@ module thumb_cluster_rep(in_offs) {
     }
 }
 
-/*
-thumb_cluster_rep(0)
-    switch_pos();
-    */
-/*
 difference() {
     //outer
     hull() {
         hull()
-            thumb_cluster_rep(0)
+            thumb_cluster_rep(bottom_height)
                 switch_pos();
 
-        linear_extrude(2)
+        linear_extrude(bottom_height)
             offset(r=1.5)
             polygon(corners);
     }
 
     //inner
     hull() {
-        thumb_cluster_rep(-height)
+        thumb_cluster_rep(height)
             switch_neg(1);
 
-        linear_extrude(2)
+        linear_extrude(bottom_height*2,center=true)
             offset(r=-1.5)
             polygon(corners);
     }
@@ -151,20 +148,17 @@ difference() {
             thumb_cluster_rep(i*height)
                 switch_pos();
 }
-*/
 
-/*
 difference() {
     hull()
         thumb_cluster_rep(0)
             switch_pos();
     thumb_cluster_rep(0)
         switch_neg(3);
-    #hull()
-        thumb_cluster_rep(height)
+    hull()
+        thumb_cluster_rep(-height)
             switch_pos();
 }
-*/
 
 /*
 row_numbers = [4,5,5,5,5];
@@ -176,7 +170,7 @@ difference(){
                 matrix_rep(row_numbers, column_radius, [0,0,0],false)
                     switch_pos();
 
-                linear_extrude(2)
+                linear_extrude(bottom_height)
                     offset(r=1.5)
                     polygon(corners);
             }
@@ -187,7 +181,7 @@ difference(){
                 matrix_rep(row_numbers, column_radius, [0,0,0],false)
                     switch_neg(1);
 
-                linear_extrude(2)
+                linear_extrude(bottom_height)
                     offset(r=-1.5)
                     polygon(corners);
             }
