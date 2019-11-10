@@ -147,7 +147,7 @@ module bottom_plate(height, points, r) {
 
 /*****************************************************************************/
 
-thumb_corners = [ [-5,-58], [-35,15], [-10,30], [76,40], [76,0], [25,-45] ] ;
+thumb_corners = [ [-8,-58], [-37,08], [-10,25], [76,40], [76,0], [25,-45] ] ;
 module thumb_outer () {
     //outer body
     hull() {
@@ -226,7 +226,7 @@ module main_keys() {
 }
 
 module main_keys_excess() {
-    row_numbers_minus = row_numbers + [1,2,2,2,6];
+    row_numbers_minus = row_numbers + [2,2,2,2,2];
     // Trim excess above switch holes
     for (i = [1:1]) {
         matrix_rep(row_numbers_minus, column_radius - i*height, [0,0,i*height],true)
@@ -249,5 +249,5 @@ difference() {
         thumb_keys();
     }
     thumb_keys_excess();
-    main_keys_excess();
+    #main_keys_excess();
 }
