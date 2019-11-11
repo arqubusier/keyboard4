@@ -153,7 +153,7 @@ module thumb_outer () {
     hull() {
 	thumb_cluster_rep(0)
 		switch_pos();
-	#bottom_plate(bottom_height, thumb_corners, 1.5);
+	bottom_plate(bottom_height, thumb_corners, 1.5);
     }
 }
 
@@ -225,6 +225,13 @@ module main_keys() {
 
 }
 
+module main_switch_clearance() {
+    switch_depth = 8;
+    matrix_rep(row_numbers, column_radius, [0,0,0],false)
+        translate([0,0,height/2 - switch_depth/2])
+            cube([10,10,switch_depth],center=true);
+}
+
 module main_keys_excess() {
     row_numbers_minus = row_numbers + [2,2,2,2,2];
     // Trim excess above switch holes
@@ -249,5 +256,6 @@ difference() {
         thumb_keys();
     }
     thumb_keys_excess();
-    #main_keys_excess();
+    main_keys_excess();
+    #main_switch_clearance();
 }
