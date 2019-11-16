@@ -316,30 +316,57 @@ module insets_neg() {
 
 /*****************************************************************************/
 module full_plate() {
-bottom_plate(bottom_height, thumb_corners, corner_radius);
-bottom_plate(bottom_height, main_corners, corner_radius);
+	bottom_plate(bottom_height, thumb_corners, corner_radius);
+	bottom_plate(bottom_height, main_corners, corner_radius);
 }
 bigvalue=200;
 plate_chamfer_angle=45;
 plate_offs_y=-20;
 
-module plate0() {
+screw_diameter = 3;
+screw_head_diameter = 5.45;
+module screw_hole() {
+	cylinder(d1=screw_diameter, d2=screw_head_diameter, h=bottom_height);
+}
+
+module plate1() {
+	hand_rest_length = 95;
+	hand_rest_height = 30;
+	hand_rest_p0 = main_corners[4] - [-30,hand_rest_length];
+	hand_rest_p1 = main_corners[5] - [0,hand_rest_length];
+	hand_rest_corners = [thumb_side0[0], main_corners[5], main_corners[4],
+				, hand_rest_p0, hand_rest_p1];
+	bottom_plate(bottom_height, hand_rest_corners, corner_radius);
 	difference() {
 		full_plate();
 			translate([0, plate_offs_y,0])
 				rotate(plate_chamfer_angle-180, [1, 0, 0])
 					translate([-bigvalue/2,  -bigvalue/2, 0])
 						cube([bigvalue, bigvalue, bigvalue]);
+		#for (p = plate1_screws) {
+			translate(p)
+				screw_hole();
+		}
 	}
+
+	hand_rest_middle0 = split_side_point([hand_rest_p0, main_corners[4]], 0.7);
+	hand_rest_middle1 = split_side_point([hand_rest_p1, main_corners[5]], 0.7);
+	bottom_plate(hand_rest_height,
+			[hand_rest_middle0, hand_rest_middle1+[25,0], hand_rest_p1+[15,0], hand_rest_p0],
+			corner_radius);
 }
 
-module plate1() {
+module plate0() {
 	difference() {
 		full_plate();
 			translate([0, plate_offs_y,0])
 				rotate(plate_chamfer_angle, [1, 0, 0])
 					translate([-bigvalue/2, -bigvalue/2, 0])
 						cube([bigvalue, bigvalue, bigvalue]);
+		#for (p = plate0_screws) {
+			translate(p)
+				screw_hole();
+		}
 	}
 }
 
@@ -373,6 +400,6 @@ difference() {
 }
 
 translate([0,0,-bottom_height]) {
-	*plate0();
-	%plate1();
+	plate0();
+	plate1();
 }
