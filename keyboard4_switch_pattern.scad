@@ -1,16 +1,49 @@
 include <../switcholder/cherrymx.scad>
 
+
+/******************************************************************************
+
+		screw inset holder
+
+/*****************************************************************************/
+inset_height = 5.10;
+inset_diameter = 5.35;
+inset_diameter_outer = inset_diameter+2;
+
+module screw_inset() {
+	difference () {
+		screw_inset_pos();
+		screw_inset_neg();
+	}
+}
+
+module screw_inset_pos() {
+	cylinder(d=inset_diameter_outer, inset_height);
+}
+
+module screw_inset_neg() {
+	cylinder(d=inset_diameter, inset_height);
+}
+
 /******************************************************************************
 
 		Common
 
 /*****************************************************************************/
 
+$fn=20;
+
 // Common
 common_offset = [0,0,34];
 common_rotate_y = 20;
 
 bottom_height = 2;
+corner_radius = inset_diameter_outer/2;
+corner_radius_inner = 0;
+
+function split_side_point(side, split_factor) =
+	let(delta = side[1] - side[0])
+		side[0] + delta * split_factor;
 
 /******************************************************************************
 
@@ -136,6 +169,7 @@ module thumb_cluster_rep(in_offs) {
 }
 
 module bottom_plate(height, points, r) {
+	translate([0,0,height/2])
         linear_extrude(height, center=true)
             offset(r)
             polygon(points);
@@ -147,13 +181,16 @@ module bottom_plate(height, points, r) {
 
 /*****************************************************************************/
 
-thumb_corners = [ [-8,-58], [-37,08], [-10,25], [76,40], [76,0], [25,-45] ] ;
+thumb_side0 = [[-8,-58], [-37,08]];
+
+thumb_corners = [ thumb_side0[0],  thumb_side0[1], [-10,25], [76,40], [76,0], [25,-45] ] ;
+
 module thumb_outer () {
     //outer body
     hull() {
 	thumb_cluster_rep(0)
 		switch_pos();
-	bottom_plate(bottom_height, thumb_corners, 1.5);
+	bottom_plate(inset_height, thumb_corners, corner_radius);
     }
 }
 
@@ -161,7 +198,7 @@ module thumb_inner () {
     hull() {
 	thumb_cluster_rep(0)
 	    switch_neg(1);
-	bottom_plate(bottom_height*2, thumb_corners, -1.5);
+	bottom_plate(inset_height*2, thumb_corners, corner_radius_inner);
     }
 }
 
@@ -190,7 +227,8 @@ module thumb_keys_excess() {
 
 /*****************************************************************************/
 
-main_corners = [ [-5,-40], [-10,35], [0,60], [76,60], [76,-45], [20,-45] ] ;
+main_side0 = [[76,60], [76,-45]];
+main_corners = [ [-5,-40], [-10,35], [0,60], main_side0[0], main_side0[1] , [20,-45] ] ;
 row_numbers = [4,5,5,5,4];
 
 module main_outer() {
@@ -199,7 +237,7 @@ module main_outer() {
 	matrix_rep(row_numbers, column_radius, [0,0,0],false)
 	    switch_pos();
 
-        bottom_plate(bottom_height, main_corners, 1.5);
+        bottom_plate(inset_height, main_corners, corner_radius);
     }
 }
 
@@ -209,7 +247,7 @@ module main_inner() {
 	matrix_rep(row_numbers, column_radius, [0,0,0],false)
 	    switch_neg(1);
 
-	bottom_plate(bottom_height, main_corners, -1.5);
+	bottom_plate(inset_height, main_corners, corner_radius_inner);
     }
 }
 
@@ -242,6 +280,78 @@ module main_keys_excess() {
 
 }
 
+
+/******************************************************************************
+
+		Screws
+
+/*****************************************************************************/
+
+main_side_split_p0 = split_side_point(main_side0, 0.5);
+plate0_screws = [thumb_corners[2], thumb_side0[1], main_side_split_p0,
+			main_corners[3], main_corners[2]]; 
+
+main_side_split_p1 = split_side_point(main_side0, 0.83);
+thumb_side_split_p1 = split_side_point(thumb_side0, 0.47); 
+plate1_screws = [thumb_side0[0], main_side_split_p1, thumb_side_split_p1, main_corners[4],
+		thumb_corners[5]]; 
+
+module insets_pos() {
+	for (p = concat(plate0_screws,plate1_screws)) {
+		translate(p)
+			screw_inset_pos();
+	}
+}
+
+module insets_neg() {
+	for (p = concat(plate0_screws,plate1_screws)) {
+		translate(p)
+			screw_inset_neg();
+	}
+}
+
+/******************************************************************************
+
+		Bottom Plates
+
+/*****************************************************************************/
+module full_plate() {
+bottom_plate(bottom_height, thumb_corners, corner_radius);
+bottom_plate(bottom_height, main_corners, corner_radius);
+}
+bigvalue=200;
+plate_chamfer_angle=45;
+plate_offs_y=-20;
+
+module plate0() {
+	difference() {
+		full_plate();
+			translate([0, plate_offs_y,0])
+				rotate(plate_chamfer_angle-180, [1, 0, 0])
+					translate([-bigvalue/2,  -bigvalue/2, 0])
+						cube([bigvalue, bigvalue, bigvalue]);
+	}
+}
+
+module plate1() {
+	difference() {
+		full_plate();
+			translate([0, plate_offs_y,0])
+				rotate(plate_chamfer_angle, [1, 0, 0])
+					translate([-bigvalue/2, -bigvalue/2, 0])
+						cube([bigvalue, bigvalue, bigvalue]);
+	}
+}
+
+
+
+/******************************************************************************
+
+		full model
+
+/*****************************************************************************/
+
+
 difference() {
     union() {
         difference() {
@@ -254,8 +364,15 @@ difference() {
         }
         main_keys();
         thumb_keys();
+        insets_pos();
     }
     thumb_keys_excess();
     main_keys_excess();
     #main_switch_clearance();
+    insets_neg();
+}
+
+translate([0,0,-bottom_height]) {
+	*plate0();
+	%plate1();
 }
