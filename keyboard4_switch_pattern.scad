@@ -10,6 +10,7 @@ inset_height = 5.10;
 inset_diameter = 5.35;
 inset_diameter_outer = inset_diameter+2;
 
+
 module screw_inset() {
 	difference () {
 		screw_inset_pos();
@@ -36,6 +37,8 @@ $fn=20;
 // Common
 common_offset = [0,0,34];
 common_rotate_y = 20;
+
+main_max_x = 73;
 
 bottom_height = 2;
 corner_radius = inset_diameter_outer/2;
@@ -183,7 +186,8 @@ module bottom_plate(height, points, r) {
 
 thumb_side0 = [[-8,-58], [-37,08]];
 
-thumb_corners = [ thumb_side0[0],  thumb_side0[1], [-10,25], [76,40], [76,0], [25,-45] ] ;
+thumb_corners = [ thumb_side0[0],  thumb_side0[1], [-10,25],
+			[main_max_x,40], [main_max_x,0], [25,-45] ] ;
 
 module thumb_outer () {
     //outer body
@@ -227,7 +231,7 @@ module thumb_keys_excess() {
 
 /*****************************************************************************/
 
-main_side0 = [[76,60], [76,-45]];
+main_side0 = [[main_max_x, 60], [main_max_x,-45]];
 main_corners = [ [-5,-40], [-10,35], [0,60], main_side0[0], main_side0[1] , [20,-45] ] ;
 row_numbers = [4,5,5,5,4];
 
@@ -292,7 +296,7 @@ plate0_screws = [thumb_corners[2], thumb_side0[1], main_side_split_p0,
 			main_corners[3], main_corners[2]]; 
 
 main_side_split_p1 = split_side_point(main_side0, 0.83);
-thumb_side_split_p1 = split_side_point(thumb_side0, 0.47); 
+thumb_side_split_p1 = split_side_point(thumb_side0, 0.35); 
 plate1_screws = [thumb_side0[0], main_side_split_p1, thumb_side_split_p1, main_corners[4],
 		thumb_corners[5]]; 
 
@@ -400,6 +404,6 @@ difference() {
 }
 
 translate([0,0,-bottom_height]) {
-	plate0();
+	*plate0();
 	plate1();
 }
