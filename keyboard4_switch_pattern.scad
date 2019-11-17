@@ -8,8 +8,8 @@ include <../switcholder/cherrymx.scad>
 /*****************************************************************************/
 inset_height = 5.10+0.5;
 inset_height_outer = 5.10+1.5;
-inset_diameter = 5.35;
-inset_diameter_outer = inset_diameter+2;
+inset_diameter = 5.5;
+inset_diameter_outer = inset_diameter+2.5;
 
 
 module screw_inset() {
@@ -26,6 +26,7 @@ module screw_inset_pos() {
 module screw_inset_neg() {
 	cylinder(d=inset_diameter, inset_height);
 	cylinder(d=inset_diameter-1, inset_height_outer);
+	#cylinder(d1=inset_diameter+1, d2=inset_diameter, 1);
 }
 
 /******************************************************************************
@@ -236,7 +237,7 @@ module thumb_keys_excess() {
 /*****************************************************************************/
 
 main_side0 = [[main_max_x, 60], [main_max_x,-45]];
-main_corners = [ [-5,-40], [-10,35], [0,60], main_side0[0], main_side0[1] , [20,-45] ] ;
+main_corners = [ [-5,-40], [-13,35], [-3,60], main_side0[0], main_side0[1] , [20,-45] ] ;
 row_numbers = [4,5,5,5,4];
 
 module main_outer() {
@@ -344,13 +345,15 @@ module plate1() {
 	hand_rest_p1 = main_corners[5] - [0,hand_rest_length];
 	hand_rest_corners = [thumb_side0[0], main_corners[5], main_corners[4],
 				, hand_rest_p0, hand_rest_p1];
-	bottom_plate(bottom_height, hand_rest_corners, corner_radius);
 	difference() {
-		full_plate();
-			translate([0, plate_offs_y,0])
-				rotate(plate_chamfer_angle-180, [1, 0, 0])
-					translate([-bigvalue/2,  -bigvalue/2, 0])
-						cube([bigvalue, bigvalue, bigvalue]);
+        union() {
+            bottom_plate(bottom_height, hand_rest_corners, corner_radius);
+            full_plate();
+        }
+        translate([0, plate_offs_y,0])
+            rotate(plate_chamfer_angle-180, [1, 0, 0])
+                translate([-bigvalue/2,  -bigvalue/2, 0])
+                    cube([bigvalue, bigvalue, bigvalue]);
 		for (p = plate1_screws) {
 			translate(p)
 				screw_hole();
@@ -419,7 +422,7 @@ usb_bmini_holder_side_offset = 35;
 usb_bmini_hole_side_offset = 1.1;
 usb_bmini_hole_front_offset = 0.7;
 usb_bmini_hole_radius = 1.75;
-connector_holder_inset = corner_radius - 2.5;
+connector_holder_inset = corner_radius - 2.5 + 0.5;
 
 usb_bmini_offset = main_corners[3] +
                 [-usb_bmini_holder_side_offset-usb_bmini_holder_width,
@@ -438,11 +441,15 @@ module holder_usb_bmini() {
             connector_holder(usb_bmini_holder_width, usb_bmini_holder_depth,
                 connector_holder_height, 13, 5, 1.0,
                 pcb_height, usb_bmini_connector_width);
+        holder_usb_bmini_screws();
+    }
+}
+
+module holder_usb_bmini_screws() {
         for (p = usb_bmini_screws){
             translate(p)
                 screw_hole();
         }
-    }
 }
 
 usb_bmicro_connector_height = 3.0;
@@ -470,16 +477,20 @@ module holder_usb_bmicro() {
             connector_holder(usb_bmicro_holder_width, usb_bmicro_holder_depth, connector_holder_height,
                         13, 4, 1.0,
                         pcb_height, usb_bmicro_connector_width);
+        holder_usb_bmicro_screws();
+    }
+}
+
+module holder_usb_bmicro_screws() {
         for (p = usb_bmicro_screws){
             translate(p)
                 screw_hole();
         }
-    }
 }
 
 
 module usb_bmini_hole() {
-    translate(main_corners[3] + [ - usb_bmini_holder_side_offset, connector_holder_inset,0]) {
+    #translate(main_corners[3] + [ - usb_bmini_holder_side_offset, connector_holder_inset,0]) {
         translate([-usb_bmini_holder_width/2 - usb_bmini_connector_width/2,-5])
             cube([usb_bmini_connector_width, 10,
             connector_holder_height+usb_bmini_connector_height+pcb_height]);
@@ -524,10 +535,11 @@ difference() {
     insets_neg();
     usb_bmicro_hole();
     usb_bmini_hole();
+    holder_usb_bmini_screws();
+    holder_usb_bmicro_screws();
 }
 
 translate([0,0,-bottom_height]) {
-	*plate0();
+	!plate0();
 	*plate1();
 }
-
