@@ -202,7 +202,7 @@ module thumb_outer () {
 
 module thumb_inner () {
     #hull() {
-        #thumb_cluster_rep(0)
+        #thumb_cluster_rep(height)
             switch_neg(1);
         bottom_plate(inset_height_outer, thumb_corners, corner_radius_inner);
     }
@@ -224,6 +224,8 @@ module thumb_keys_excess() {
     for (i=[1:3])
 	thumb_cluster_rep(-i*height)
 	    switch_pos();
+    thumb_cluster_rep(0)
+        switch_neg(3);
 }
 
 
