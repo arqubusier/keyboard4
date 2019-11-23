@@ -1,5 +1,11 @@
 include <../switcholder/cherrymx.scad>
 
+/******************************************************************************
+
+        Util
+
+/*****************************************************************************/
+function get(data, key) = data[search([key], data)[0]][1];
 
 /******************************************************************************
 
@@ -333,7 +339,7 @@ plate_chamfer_angle=45;
 plate_offs_y=-20;
 
 screw_diameter = 3;
-screw_head_diameter = 5.45;
+screw_head_diameter = 5.45 + 1;
 module screw_hole() {
 	cylinder(d2=screw_diameter, d1=screw_head_diameter, h=bottom_height);
 }
@@ -410,6 +416,21 @@ module connector_holder (width, depth, height, width_connections, depth_connecti
     }
     translate([width/2 - connector_width/2, depth, 0]) 
         cube([connector_width, connector_overhang, height+pcb_height]);
+}
+module connector_holder_ (data) {
+    difference() {
+        cube([get(data,"holder_width"),
+              get(data,"holder_depth"),
+              get(data,"holder_height")]);
+        translate([get(data,"holder_width")/2-get(data,"width_connections")/2,0,0])
+            cube([get(data,"width_connections"),
+                  get(data,"depth_connections"),
+                  get(data,"holder_height")]);
+    }
+    translate([get(data,"holder_width")/2-get(data,"width_connections")/2,
+                get(data,"holder_depth"), 0]) 
+        cube([get(data,"connector_width"), get(data,"connector_overhang"),
+              get(data,"holder_height") + get(data,"pcb_height")]);
 }
 
 pcb_height = 1.7;
@@ -488,6 +509,64 @@ module holder_usb_bmicro_screws() {
         }
 }
 
+usb_a_connector_height = 7.6;
+usb_a_connector_width = 13.6;
+usb_a_holder_width = 26;
+usb_a_holder_depth = 20.16;
+usb_a_holder_side_offset = 10;
+usb_a_hole_side_offset = 1.1;
+usb_a_hole_front_offset = 0.8;
+usb_a_hole_radius = 1.75;
+usb_a_depth_connections = 4;
+usb_a_width_connections = 14;
+usb_a_connector_overhang = 2.7;
+
+usb_a_data = [
+    ["connector_height", 7.6],
+    ["connector_width", 13.6],
+    ["holder_width", 26],
+    ["holder_depth", 20.16],
+    ["holder_height", 2],
+    ["holder_side_offset", 10],
+    ["hole_side_offset", 1.1],
+    ["hole_front_offset", 0.8],
+    ["hole_radius", 1.75],
+    ["depth_connections", 4],
+    ["width_connections", 14],
+    ["connector_overhang", 2.7],
+    ["pcb_height", 1.7],
+];
+
+function usb_holder_offset(data) = main_corners[3] +
+                [-get(data, "holder_side_offset")-get(data, "holder_width"),
+                connector_holder_inset -get(data, "holder_depth"), 0];
+function usb_screws_pos(data) = [
+                usb_holder_offset(data) +
+                    [get(data, "hole_radius") + get(data, "hole_side_offset"),
+                     get(data, "holder_depth")
+                        - get(data, "hole_radius")
+                        - get(data, "hole_front_offset"), 0],
+                usb_holder_offset(data) +
+                   [get(data,"holder_width") -
+                       (get(data,"hole_radius") + get(data,"hole_side_offset")),
+                       get(data, "holder_depth")
+                           - get(data, "hole_radius")
+                           - get(data, "hole_front_offset"), 0]];
+module usb_holder_screws(data) {
+    for (p = usb_screws_pos(data)){
+        translate(p)
+            screw_hole();
+    }
+}
+module usb_holder(data) {
+    difference() {
+        translate(usb_holder_offset(data))
+            connector_holder_(data);
+        #usb_holder_screws(data);
+    }
+}
+
+!usb_holder(usb_a_data);
 
 module usb_bmini_hole() {
     #translate(main_corners[3] + [ - usb_bmini_holder_side_offset, connector_holder_inset,0]) {
@@ -540,6 +619,6 @@ difference() {
 }
 
 translate([0,0,-bottom_height]) {
-	!plate0();
-	*plate1();
+	plate0();
+	plate1();
 }
