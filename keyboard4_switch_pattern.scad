@@ -32,7 +32,7 @@ module screw_inset_pos() {
 module screw_inset_neg() {
 	cylinder(d=inset_diameter, inset_height);
 	cylinder(d=inset_diameter-1, inset_height_outer);
-	#cylinder(d1=inset_diameter+1, d2=inset_diameter, 1);
+	cylinder(d1=inset_diameter+1, d2=inset_diameter, 1);
 }
 
 /******************************************************************************
@@ -208,8 +208,8 @@ module thumb_outer () {
 }
 
 module thumb_inner () {
-    #hull() {
-        #thumb_cluster_rep(height)
+    hull() {
+        thumb_cluster_rep(height)
             switch_neg(1);
         bottom_plate(inset_height_outer, thumb_corners, corner_radius_inner);
     }
@@ -374,9 +374,9 @@ module plate1() {
 }
 
 module plate0() {
-    translate([0,0,bottom_height]){
-        holder_usb_bmini();
-        holder_usb_bmicro();
+    #translate([0,0,bottom_height]){
+        usb_holder(usb_bmini_data);
+        usb_holder(usb_a_data);
     }
 	difference() {
 		full_plate();
@@ -388,11 +388,11 @@ module plate0() {
 			translate(p)
 				screw_hole();
 		}
-        for (p = usb_bmini_screws){
+        for (p = usb_screws_pos(usb_bmini_data)){
             translate(p)
                 cylinder(d=screw_head_diameter,h=bottom_height);
         }
-        for (p = usb_bmicro_screws){
+        for (p = usb_screws_pos(usb_a_data)){
             translate(p)
                 cylinder(d=screw_head_diameter,h=bottom_height);
         }
@@ -407,17 +407,7 @@ module plate0() {
 /*****************************************************************************/
 
 
-module connector_holder (width, depth, height, width_connections, depth_connections,
-			 connector_overhang, pcb_height, connector_width) {
-    difference() {
-        cube([width, depth, height]);
-        translate([width/2-width_connections/2,0,0])
-            cube([width_connections, depth_connections, height]);
-    }
-    translate([width/2 - connector_width/2, depth, 0]) 
-        cube([connector_width, connector_overhang, height+pcb_height]);
-}
-module connector_holder_ (data) {
+module connector_holder (data) {
     difference() {
         cube([get(data,"holder_width"),
               get(data,"holder_depth"),
@@ -427,99 +417,11 @@ module connector_holder_ (data) {
                   get(data,"depth_connections"),
                   get(data,"holder_height")]);
     }
-    translate([get(data,"holder_width")/2-get(data,"width_connections")/2,
+    translate([get(data,"holder_width")/2-get(data,"connector_width")/2,
                 get(data,"holder_depth"), 0]) 
-        cube([get(data,"connector_width"), get(data,"connector_overhang"),
+        cube([get(data,"connector_width"), corner_radius - usb_holder_inset(data),
               get(data,"holder_height") + get(data,"pcb_height")]);
 }
-
-pcb_height = 1.7;
-connector_holder_height = 2;
-usb_bmini_connector_height = 4.1;
-usb_bmini_connector_width = 7.7;
-usb_bmini_holder_depth = 19.2;
-usb_bmini_holder_width = 26;
-usb_bmini_holder_side_offset = 35;
-usb_bmini_hole_side_offset = 1.1;
-usb_bmini_hole_front_offset = 0.7;
-usb_bmini_hole_radius = 1.75;
-connector_holder_inset = corner_radius - 2.5 + 0.5;
-
-usb_bmini_offset = main_corners[3] +
-                [-usb_bmini_holder_side_offset-usb_bmini_holder_width,
-                connector_holder_inset -usb_bmini_holder_depth, 0];
-usb_bmini_screws =   
-                [usb_bmini_offset +
-                    [usb_bmini_hole_radius+usb_bmini_hole_side_offset,
-                    usb_bmini_holder_depth - usb_bmini_hole_radius - usb_bmini_hole_front_offset, 0],
-                 usb_bmini_offset +
-                    [usb_bmini_holder_width - (usb_bmini_hole_radius+usb_bmini_hole_side_offset),
-                    usb_bmini_holder_depth - usb_bmini_hole_radius - usb_bmini_hole_front_offset, 0]];
-
-module holder_usb_bmini() {
-    difference() {
-        translate(usb_bmini_offset)
-            connector_holder(usb_bmini_holder_width, usb_bmini_holder_depth,
-                connector_holder_height, 13, 5, 1.0,
-                pcb_height, usb_bmini_connector_width);
-        holder_usb_bmini_screws();
-    }
-}
-
-module holder_usb_bmini_screws() {
-        for (p = usb_bmini_screws){
-            translate(p)
-                screw_hole();
-        }
-}
-
-usb_bmicro_connector_height = 3.0;
-usb_bmicro_connector_width = 8.0;
-usb_bmicro_holder_width = 21;
-usb_bmicro_holder_depth = 11.4;
-usb_bmicro_holder_side_offset = 10;
-usb_bmicro_hole_side_offset = 1.1;
-usb_bmicro_hole_front_offset = 0.9;
-usb_bmicro_hole_radius = 1.75;
-
-usb_bmicro_offset = main_corners[3] +
-                [-usb_bmicro_holder_side_offset-usb_bmicro_holder_width,
-                connector_holder_inset-usb_bmicro_holder_depth, 0];
-usb_bmicro_screws = [usb_bmicro_offset +
-                        [usb_bmicro_hole_radius+usb_bmicro_hole_side_offset,
-                        usb_bmicro_holder_depth - usb_bmicro_hole_radius - usb_bmicro_hole_front_offset,0],
-                    usb_bmicro_offset +
-                        [usb_bmicro_holder_width - (usb_bmicro_hole_radius+usb_bmicro_hole_side_offset),
-                        usb_bmicro_holder_depth - usb_bmicro_hole_radius - usb_bmicro_hole_front_offset,0]];
-
-module holder_usb_bmicro() {
-    difference() {
-        translate(usb_bmicro_offset)
-            connector_holder(usb_bmicro_holder_width, usb_bmicro_holder_depth, connector_holder_height,
-                        13, 4, 1.0,
-                        pcb_height, usb_bmicro_connector_width);
-        holder_usb_bmicro_screws();
-    }
-}
-
-module holder_usb_bmicro_screws() {
-        for (p = usb_bmicro_screws){
-            translate(p)
-                screw_hole();
-        }
-}
-
-usb_a_connector_height = 7.6;
-usb_a_connector_width = 13.6;
-usb_a_holder_width = 26;
-usb_a_holder_depth = 20.16;
-usb_a_holder_side_offset = 10;
-usb_a_hole_side_offset = 1.1;
-usb_a_hole_front_offset = 0.8;
-usb_a_hole_radius = 1.75;
-usb_a_depth_connections = 4;
-usb_a_width_connections = 14;
-usb_a_connector_overhang = 2.7;
 
 usb_a_data = [
     ["connector_height", 7.6],
@@ -537,9 +439,43 @@ usb_a_data = [
     ["pcb_height", 1.7],
 ];
 
+usb_bmicro_data = [
+    ["holder_height", 2],
+    ["depth_connections", 4],
+    ["width_connections", 14],
+    ["connector_overhang", 1.3],
+    ["pcb_height", 1.7],
+    ["connector_height", 3.0],
+    ["connector_width", 8.0],
+    ["holder_width", 21],
+    ["holder_depth", 11.4],
+    ["holder_side_offset", 10],
+    ["hole_side_offset", 1.1],
+    ["hole_front_offset", 0.9],
+    ["hole_radius", 1.75],
+];
+
+usb_bmini_data = [
+    ["holder_height", 2],
+    ["depth_connections", 4],
+    ["width_connections", 14],
+    ["connector_overhang", 1.3],
+    ["pcb_height", 1.7],
+    ["connector_height", 4.1],
+    ["connector_width", 7.7],
+    ["holder_depth", 19.2],
+    ["holder_width", 26],
+    ["holder_side_offset", 40],
+    ["hole_side_offset", 1.1],
+    ["hole_front_offset", 0.7],
+    ["hole_radius", 1.75],
+];
+
+function usb_holder_inset(data) = corner_radius - get(data,"connector_overhang") - 1.0;
+
 function usb_holder_offset(data) = main_corners[3] +
                 [-get(data, "holder_side_offset")-get(data, "holder_width"),
-                connector_holder_inset -get(data, "holder_depth"), 0];
+                usb_holder_inset(data) -get(data, "holder_depth"), 0];
 function usb_screws_pos(data) = [
                 usb_holder_offset(data) +
                     [get(data, "hole_radius") + get(data, "hole_side_offset"),
@@ -561,30 +497,19 @@ module usb_holder_screws(data) {
 module usb_holder(data) {
     difference() {
         translate(usb_holder_offset(data))
-            connector_holder_(data);
-        #usb_holder_screws(data);
+            connector_holder(data);
+        usb_holder_screws(data);
     }
 }
 
-!usb_holder(usb_a_data);
-
-module usb_bmini_hole() {
-    #translate(main_corners[3] + [ - usb_bmini_holder_side_offset, connector_holder_inset,0]) {
-        translate([-usb_bmini_holder_width/2 - usb_bmini_connector_width/2,-5])
-            cube([usb_bmini_connector_width, 10,
-            connector_holder_height+usb_bmini_connector_height+pcb_height]);
-        translate([-usb_bmini_holder_width,-usb_bmini_holder_depth,0])
-            cube([usb_bmini_holder_width, usb_bmini_holder_depth, connector_holder_height]);
-    }
-}
-
-module usb_bmicro_hole() {
-    translate(main_corners[3] + [ - usb_bmicro_holder_side_offset, connector_holder_inset,0]) {
-        translate([-usb_bmicro_holder_width/2 - usb_bmicro_connector_width/2,-5])
-            cube([usb_bmicro_connector_width, 10,
-            connector_holder_height+usb_bmicro_connector_height+pcb_height]);
-        translate([-usb_bmicro_holder_width,-usb_bmicro_holder_depth,0])
-            cube([usb_bmicro_holder_width, usb_bmicro_holder_depth, connector_holder_height]);
+module usb_hole(data) {
+    tolerance = 0.4;
+    translate(usb_holder_offset(data)) {
+        translate([get(data,"holder_width")/2 - (get(data,"connector_width") + tolerance)/2,
+                    get(data,"holder_depth")-usb_holder_inset(data),0])
+            cube([get(data,"connector_width") + tolerance, 10,
+                    get(data,"holder_height")+get(data,"connector_height")+get(data,"pcb_height")]);
+            cube([get(data,"holder_width"), get(data,"holder_depth"), get(data,"holder_height")]);
     }
 }
 /******************************************************************************
@@ -612,10 +537,10 @@ difference() {
     main_keys_excess();
     main_switch_clearance();
     insets_neg();
-    usb_bmicro_hole();
-    usb_bmini_hole();
-    holder_usb_bmini_screws();
-    holder_usb_bmicro_screws();
+    usb_hole(usb_a_data);
+    usb_hole(usb_bmini_data);
+    usb_holder_screws(usb_a_data);
+    usb_holder_screws(usb_bmini_data);
 }
 
 translate([0,0,-bottom_height]) {
