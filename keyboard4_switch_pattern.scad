@@ -511,6 +511,12 @@ module usb_hole(data) {
                     get(data,"holder_height")+get(data,"connector_height")+get(data,"pcb_height")]);
             cube([get(data,"holder_width"), get(data,"holder_depth"), get(data,"holder_height")]);
     }
+    m3_nut_max_w = 6.3;
+    m3_nut_h = 2.4;
+    #for (p = usb_screws_pos(data)) {
+        translate(p)
+            cylinder(d=m3_nut_max_w, h=get(data,"holder_height")+m3_nut_h);
+    }
 }
 /******************************************************************************
 
