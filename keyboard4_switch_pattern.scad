@@ -166,13 +166,13 @@ module thumb_cluster_rep(in_offs) {
             translate([-2 -0.5*switch_side_outer, -23, up_offs-1.5*switch_side_outer - 0.5*height]){
                 rotate(-13, v=[1,0,0]) {
                     thumb_row_rep( thumb_out_angle + 12, thumb_flattness_angle,
-                                    in_offs-thumb_height_diff, 2, 1*switch_side_outer, 2)
+                                    in_offs-1.75*thumb_height_diff, 2, .9*switch_side_outer, 2)
                                     children();
                     thumb_row_rep( thumb_out_angle, thumb_flattness_angle,
                                     in_offs, 0, -0.5*switch_side_outer, 2)
                                     children();
                     thumb_row_rep( thumb_out_angle - 12, thumb_flattness_angle,
-                                    in_offs+thumb_height_diff, 0, 3 + -2*switch_side_outer, 2)
+                                    in_offs+thumb_height_diff, 0, 3 + -1.8*switch_side_outer, 2)
                                     children();
                         }
                 }
@@ -306,8 +306,8 @@ main_side_split_p0 = split_side_point(main_side0, 0.5);
 plate0_screws = [thumb_corners[2], thumb_side0[1], main_side_split_p0,
 			main_corners[3], main_corners[2]]; 
 
-main_side_split_p1 = split_side_point(main_side0, 0.83);
-thumb_side_split_p1 = split_side_point(thumb_side0, 0.35); 
+main_side_split_p1 = split_side_point(main_side0, 0.7);
+thumb_side_split_p1 = split_side_point(thumb_side0, 0.7); 
 plate1_screws = [thumb_side0[0], main_side_split_p1, thumb_side_split_p1, main_corners[4],
 		thumb_corners[5]]; 
 
@@ -336,7 +336,7 @@ module full_plate() {
 }
 bigvalue=200;
 plate_chamfer_angle=45;
-plate_offs_y=-20;
+plate_offs_y=-5;
 
 screw_diameter = 3;
 screw_head_diameter = 5.45 + 1;
@@ -374,7 +374,7 @@ module plate1() {
 }
 
 module plate0() {
-    #translate([0,0,bottom_height]){
+    translate([0,0,bottom_height]){
         usb_holder(usb_bmini_data);
         usb_holder(usb_a_data);
     }
@@ -511,11 +511,15 @@ module usb_hole(data) {
                     get(data,"holder_height")+get(data,"connector_height")+get(data,"pcb_height")]);
             cube([get(data,"holder_width"), get(data,"holder_depth"), get(data,"holder_height")]);
     }
+
+    tolerance1 = 0.3;
     m3_nut_max_w = 6.3;
     m3_nut_h = 2.4;
-    #for (p = usb_screws_pos(data)) {
+
+    for (p = usb_screws_pos(data)) {
         translate(p)
-            cylinder(d=m3_nut_max_w, h=get(data,"holder_height")+m3_nut_h);
+            cylinder(d=m3_nut_max_w+tolerance1,
+                     h=get(data,"holder_height") + m3_nut_h + tolerance1);
     }
 }
 /******************************************************************************
@@ -542,7 +546,7 @@ difference() {
     thumb_keys_excess();
     main_keys_excess();
     main_switch_clearance();
-    insets_neg();
+    #insets_neg();
     usb_hole(usb_a_data);
     usb_hole(usb_bmini_data);
     usb_holder_screws(usb_a_data);
@@ -550,6 +554,6 @@ difference() {
 }
 
 translate([0,0,-bottom_height]) {
-	plate0();
+	%plate0();
 	plate1();
 }
