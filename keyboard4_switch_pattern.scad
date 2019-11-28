@@ -7,14 +7,14 @@ include <../switcholder/cherrymx.scad>
 /*****************************************************************************/
 main_max_x = 73;
 
-thumb_back_middle_p = [25,-45];
+thumb_back_middle_p = [25,-43];
 thumb_middle0_out_p = [-30,-10];
 thumb_middle1_out_p = [-10,-35];
 thumb_front_out_p = [-40,2];
-thumb_back_out_p = [-8,-48];
+thumb_back_out_p = [-9,-52];
 thumb_front_middle_p = [-10,25];
-thumb_front_in_p = [main_max_x,40];
-thumb_back_in_p = [main_max_x,20];
+thumb_front_in_p = [73,42];
+thumb_back_in_p = [73,11];
 
 /******************************************************************************
 
@@ -197,8 +197,8 @@ module thumb_middle_row(in_offs) {
 }
 module thumb_back_row(in_offs) {
     thumb_pos()
-        thumb_row_rep( thumb_out_angle - 12, thumb_flattness_angle,
-                        in_offs+thumb_height_diff, 0.1, 3 + -1.75*switch_side_outer, 2)
+        thumb_row_rep( thumb_out_angle - 10, thumb_flattness_angle,
+                        in_offs+thumb_height_diff-1, -0.9, 3 + -2*switch_side_outer, 2)
                         children();
 }
 
@@ -239,46 +239,55 @@ thumb_corners = [ thumb_side0[0], [-20,0], thumb_side0[1], [-10,25],
 			[main_max_x,40], [main_max_x,0], [25,-45] ] ;
 
 
-module thumb_body () {
+module thumb_body (_corner_radius) {
     //outer body
     hull() {
         thumb_front_row(0)
             children();
         bottom_plate(inset_height_outer,
              [
-            thumb_front_in_p,
+            thumb_back_in_p,
             thumb_front_middle_p,
             thumb_front_out_p,
             thumb_middle0_out_p,
               ]
-            , corner_radius);
+            , _corner_radius);
     }
     hull() {
         thumb_middle_row(0)
             children();
-        #bottom_plate(inset_height_outer, 
+        bottom_plate(inset_height_outer, 
              [
             thumb_back_in_p,
             thumb_front_in_p,
             thumb_middle0_out_p,
             thumb_middle1_out_p,
               ],
-            corner_radius);
+            _corner_radius);
     }
     hull() {
         thumb_back_row(0)
             children();
         bottom_plate(inset_height_outer,
              [
-            thumb_back_in_p,
+            thumb_front_in_p,
             thumb_back_middle_p,
             thumb_back_out_p,
             thumb_middle1_out_p,
               ],
-        corner_radius);
+        _corner_radius);
     }
 }
 
+module thumb_keys () {
+    thumb_front_row(0)
+        switch();
+    thumb_middle_row(0)
+        switch();
+    thumb_back_row(0)
+        switch();
+}
+/*
 module thumb_keys () {
 	// Connected Switch holes with excess above
 	difference() {
@@ -288,6 +297,7 @@ module thumb_keys () {
             switch_neg(3);
 	}
 }
+*/
 
 module thumb_keys_hole() {
     // Trim excess above switch holes
@@ -312,7 +322,7 @@ module thumb_keys_excess() {
 /*****************************************************************************/
 
 main_side0 = [[main_max_x, 60], [main_max_x,-45]];
-main_corners = [ [-5,-40], [-13,35], [-3,60], main_side0[0], main_side0[1] , [20,-45] ] ;
+main_corners = [ [-0,-15], [-13,35], [-3,60], main_side0[0], main_side0[1] , [20,-45] ] ;
 row_numbers = [4,5,5,5,4];
 matrix_offs = [0,0,2];
 
@@ -322,7 +332,7 @@ module main_outer() {
 	matrix_rep(row_numbers, column_radius, matrix_offs, false)
 	    switch_pos();
 
-        bottom_plate(inset_height_outer, main_corners, corner_radius);
+        #bottom_plate(inset_height_outer, main_corners, corner_radius);
     }
 }
 
@@ -598,17 +608,17 @@ module usb_hole(data) {
 /*****************************************************************************/
 
 
-difference() {
+!difference() {
     union() {
         difference() {
             union() {
                 main_outer();
-                !thumb_body()
+                thumb_body(corner_radius)
                     switch_pos();
             }
             main_inner();
-            thumb_body()
-                switch_pos();
+            thumb_body(0)
+                switch_neg(1);
         }
         main_keys();
         thumb_keys();
