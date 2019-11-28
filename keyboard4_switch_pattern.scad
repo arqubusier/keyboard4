@@ -232,12 +232,9 @@ module bottom_plate(height, points, r) {
 
 /*****************************************************************************/
 
-thumb_side0 = [thumb_back_out_p, thumb_front_out_p];
-thumb_side_split_p1 = split_side_point(thumb_side0, 0.7); 
-
-thumb_corners = [ thumb_side0[0], [-20,0], thumb_side0[1], [-10,25],
-			[main_max_x,40], [main_max_x,0], [25,-45] ] ;
-
+thumb_corners = [ thumb_front_middle_p, thumb_front_out_p,
+                    thumb_middle0_out_p, thumb_middle1_out_p,
+                    thumb_back_out_p, thumb_back_middle_p ];
 
 module thumb_body (_corner_radius) {
     //outer body
@@ -383,12 +380,11 @@ module main_keys_excess() {
 /*****************************************************************************/
 
 main_side_split_p0 = split_side_point(main_side0, 0.5);
-plate0_screws = [thumb_corners[2], thumb_side0[1], main_side_split_p0,
+plate0_screws = [thumb_front_out_p, thumb_front_middle_p, main_side_split_p0,
 			main_corners[3], main_corners[2]]; 
 
 main_side_split_p1 = split_side_point(main_side0, 0.7);
-plate1_screws = [thumb_side0[0], main_side_split_p1, thumb_side_split_p1, main_corners[4],
-		thumb_corners[5]]; 
+plate1_screws = [thumb_back_middle_p, main_side_split_p1, thumb_middle1_out_p, main_corners[4]]; 
 
 module insets_pos() {
 	for (p = concat(plate0_screws,plate1_screws)) {
@@ -428,7 +424,7 @@ module plate1() {
 	hand_rest_height = 30;
 	hand_rest_p0 = main_corners[4] - [-30,hand_rest_length];
 	hand_rest_p1 = main_corners[5] - [0,hand_rest_length];
-	hand_rest_corners = [thumb_side0[0], main_corners[5], main_corners[4],
+	hand_rest_corners = [thumb_back_out_p, main_corners[5], main_corners[4],
 				, hand_rest_p0, hand_rest_p1];
 	difference() {
         union() {
@@ -635,6 +631,6 @@ module usb_hole(data) {
 }
 
 translate([0,0,-bottom_height]) {
-	%plate0();
+	plate0();
 	plate1();
 }
