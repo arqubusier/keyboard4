@@ -2,6 +2,22 @@ include <../switcholder/cherrymx.scad>
 
 /******************************************************************************
 
+        Parameters
+
+/*****************************************************************************/
+main_max_x = 73;
+
+thumb_back_middle_p = [25,-45];
+thumb_middle0_out_p = [-30,-10];
+thumb_middle1_out_p = [-10,-35];
+thumb_front_out_p = [-40,2];
+thumb_back_out_p = [-8,-48];
+thumb_front_middle_p = [-10,25];
+thumb_front_in_p = [main_max_x,40];
+thumb_back_in_p = [main_max_x,20];
+
+/******************************************************************************
+
         Util
 
 /*****************************************************************************/
@@ -47,7 +63,6 @@ $fn=20;
 common_offset = [0,0,34];
 common_rotate_y = 20;
 
-main_max_x = 73;
 
 bottom_height = 2;
 corner_radius = inset_diameter_outer/2;
@@ -136,6 +151,17 @@ module matrix_rep(row_numbers, radius, offs, columnHull) {
 		Thumb Columns
 
 /*****************************************************************************/
+// Thumb cluster
+thumb_radius1 = 0;
+thumb_z_angle1 = 0;
+thumb_radius2 = 0;
+thumb_height_diff = 10;
+thumb_radius3 = 0;
+thumb_z_angle2 = 0;
+thumb_z_angle3 = 0;
+thumb_flattness_angle = 95;
+thumb_x_angle = 0;
+thumb_out_angle = 22;
 
 module thumb_row_rep(out_angle, flatness_angle, in_offs, up_offs, forward_offs, n) {
     for (i = [0:n-1]) {
@@ -148,35 +174,48 @@ module thumb_row_rep(out_angle, flatness_angle, in_offs, up_offs, forward_offs, 
 }
 
 
-module thumb_cluster_rep(in_offs) {
-    // Thumb cluster
-    up_offs = 0.2;
-    thumb_radius1 = 0;
-    thumb_z_angle1 = 0;
-    thumb_radius2 = 0;
-    thumb_height_diff = 10;
-    thumb_radius3 = 0;
-    thumb_z_angle2 = 0;
-    thumb_z_angle3 = 0;
-    thumb_flattness_angle = 95;
-    thumb_x_angle = 0;
-    thumb_out_angle = 22;
-    translate(common_offset) {
-        rotate(common_rotate_y, [0,1,0]) {
-            translate([-2 -0.5*switch_side_outer, -23, up_offs-1.5*switch_side_outer - 0.5*height]){
-                rotate(-13, v=[1,0,0]) {
-                    thumb_row_rep( thumb_out_angle + 12, thumb_flattness_angle,
-                                    in_offs-1.75*thumb_height_diff, 2, .9*switch_side_outer, 2)
-                                    children();
-                    thumb_row_rep( thumb_out_angle, thumb_flattness_angle,
-                                    in_offs, 0, -0.5*switch_side_outer, 2)
-                                    children();
-                    thumb_row_rep( thumb_out_angle - 12, thumb_flattness_angle,
-                                    in_offs+thumb_height_diff, 0, 3 + -1.8*switch_side_outer, 2)
-                                    children();
-                        }
-                }
+
+module thumb_pos() {
+    translate(common_offset)
+        rotate(common_rotate_y, [0,1,0])
+            translate([-2 -0.5*switch_side_outer, -23, 0.2-1.5*switch_side_outer - 0.5*height])
+                rotate(-13, v=[1,0,0])
+                    children();
+}
+
+module thumb_front_row(in_offs) {
+    thumb_pos()
+        thumb_row_rep( thumb_out_angle + 12, thumb_flattness_angle,
+                        in_offs-1.75*thumb_height_diff, 2, .85*switch_side_outer, 2)
+                        children();
+}
+module thumb_middle_row(in_offs) {
+    thumb_pos()
+        thumb_row_rep( thumb_out_angle, thumb_flattness_angle,
+                        in_offs, 0.1, -0.5*switch_side_outer, 2)
+                        children();
+}
+module thumb_back_row(in_offs) {
+    thumb_pos()
+        thumb_row_rep( thumb_out_angle - 12, thumb_flattness_angle,
+                        in_offs+thumb_height_diff, 0.1, 3 + -1.75*switch_side_outer, 2)
+                        children();
+}
+
+module thumb_cluster_rep(in_offs, pairwise_hull) {
+    if (pairwise_hull) {
+        hull() {
+            thumb_front_row(in_offs) children();
+            thumb_middle_row(in_offs) children();
         }
+        hull() {
+            thumb_middle_row(in_offs) children();
+            thumb_back_row(in_offs) children();
+        }
+    } else {
+        thumb_front_row(in_offs) children();
+        thumb_middle_row(in_offs) children();
+        thumb_back_row(in_offs) children();
     }
 }
 
@@ -193,46 +232,76 @@ module bottom_plate(height, points, r) {
 
 /*****************************************************************************/
 
-thumb_side0 = [[-8,-58], [-37,08]];
+thumb_side0 = [thumb_back_out_p, thumb_front_out_p];
+thumb_side_split_p1 = split_side_point(thumb_side0, 0.7); 
 
-thumb_corners = [ thumb_side0[0],  thumb_side0[1], [-10,25],
+thumb_corners = [ thumb_side0[0], [-20,0], thumb_side0[1], [-10,25],
 			[main_max_x,40], [main_max_x,0], [25,-45] ] ;
 
-module thumb_outer () {
+
+module thumb_body () {
     //outer body
     hull() {
-	thumb_cluster_rep(0)
-		switch_pos();
-	bottom_plate(inset_height_outer, thumb_corners, corner_radius);
+        thumb_front_row(0)
+            children();
+        bottom_plate(inset_height_outer,
+             [
+            thumb_front_in_p,
+            thumb_front_middle_p,
+            thumb_front_out_p,
+            thumb_middle0_out_p,
+              ]
+            , corner_radius);
     }
-}
-
-module thumb_inner () {
     hull() {
-        thumb_cluster_rep(height)
-            switch_neg(1);
-        bottom_plate(inset_height_outer, thumb_corners, corner_radius_inner);
+        thumb_middle_row(0)
+            children();
+        #bottom_plate(inset_height_outer, 
+             [
+            thumb_back_in_p,
+            thumb_front_in_p,
+            thumb_middle0_out_p,
+            thumb_middle1_out_p,
+              ],
+            corner_radius);
+    }
+    hull() {
+        thumb_back_row(0)
+            children();
+        bottom_plate(inset_height_outer,
+             [
+            thumb_back_in_p,
+            thumb_back_middle_p,
+            thumb_back_out_p,
+            thumb_middle1_out_p,
+              ],
+        corner_radius);
     }
 }
 
 module thumb_keys () {
 	// Connected Switch holes with excess above
 	difference() {
-	    hull()
-		thumb_cluster_rep(0)
+		thumb_cluster_rep(0,true)
 		    switch_pos();
-	    thumb_cluster_rep(0)
-		switch_neg(3);
+	    thumb_cluster_rep(0,false)
+            switch_neg(3);
 	}
 }
 
+module thumb_keys_hole() {
+    // Trim excess above switch holes
+    for (i=[1:1])
+		thumb_cluster_rep(-i*height,true)
+		    switch_pos();
+}
 module thumb_keys_excess() {
     // Trim excess above switch holes
-    for (i=[1:3])
-	thumb_cluster_rep(-i*height)
+    for (i=[1:4])
+	thumb_cluster_rep(-i*height,false)
 	    switch_pos();
-    thumb_cluster_rep(0)
-        switch_neg(3);
+    thumb_cluster_rep(0,false)
+        switch_neg(4);
 }
 
 
@@ -245,11 +314,12 @@ module thumb_keys_excess() {
 main_side0 = [[main_max_x, 60], [main_max_x,-45]];
 main_corners = [ [-5,-40], [-13,35], [-3,60], main_side0[0], main_side0[1] , [20,-45] ] ;
 row_numbers = [4,5,5,5,4];
+matrix_offs = [0,0,2];
 
 module main_outer() {
     //outer body
     hull(){
-	matrix_rep(row_numbers, column_radius, [0,0,0],false)
+	matrix_rep(row_numbers, column_radius, matrix_offs, false)
 	    switch_pos();
 
         bottom_plate(inset_height_outer, main_corners, corner_radius);
@@ -259,7 +329,7 @@ module main_outer() {
 module main_inner() {
     //inner body
     hull(){
-	matrix_rep(row_numbers, column_radius, [0,0,0],false)
+	matrix_rep(row_numbers, column_radius, matrix_offs,false)
 	    switch_neg(1);
 
 	bottom_plate(inset_height_outer, main_corners, corner_radius_inner);
@@ -270,9 +340,9 @@ module main_keys() {
     // Connected Switch holes with excess above
     difference() {
         hull()
-    	matrix_rep(row_numbers, column_radius, [0,0,0],true)
+    	matrix_rep(row_numbers, column_radius, matrix_offs,true)
     	    switch_pos();
-        matrix_rep(row_numbers, column_radius - height, [0,0,0],false)
+        matrix_rep(row_numbers, column_radius - height, matrix_offs,false)
     	switch_neg(10);
     }
 
@@ -280,7 +350,7 @@ module main_keys() {
 
 module main_switch_clearance() {
     switch_depth = 8;
-    matrix_rep(row_numbers, column_radius, [0,0,0],false)
+    matrix_rep(row_numbers, column_radius, matrix_offs,false)
         translate([0,0,height/2 - switch_depth/2])
             cube([10,10,switch_depth],center=true);
 }
@@ -289,7 +359,7 @@ module main_keys_excess() {
     row_numbers_minus = row_numbers + [2,2,2,2,2];
     // Trim excess above switch holes
     for (i = [1:1]) {
-        matrix_rep(row_numbers_minus, column_radius - i*height, [0,0,i*height],true)
+        matrix_rep(row_numbers_minus, column_radius - i*height, matrix_offs + [0,0,i*height],true)
             switch_pos();
     }
 
@@ -307,7 +377,6 @@ plate0_screws = [thumb_corners[2], thumb_side0[1], main_side_split_p0,
 			main_corners[3], main_corners[2]]; 
 
 main_side_split_p1 = split_side_point(main_side0, 0.7);
-thumb_side_split_p1 = split_side_point(thumb_side0, 0.7); 
 plate1_screws = [thumb_side0[0], main_side_split_p1, thumb_side_split_p1, main_corners[4],
 		thumb_corners[5]]; 
 
@@ -534,10 +603,12 @@ difference() {
         difference() {
             union() {
                 main_outer();
-                thumb_outer();
+                !thumb_body()
+                    switch_pos();
             }
             main_inner();
-            thumb_inner();
+            thumb_body()
+                switch_pos();
         }
         main_keys();
         thumb_keys();
@@ -546,7 +617,7 @@ difference() {
     thumb_keys_excess();
     main_keys_excess();
     main_switch_clearance();
-    #insets_neg();
+    insets_neg();
     usb_hole(usb_a_data);
     usb_hole(usb_bmini_data);
     usb_holder_screws(usb_a_data);
