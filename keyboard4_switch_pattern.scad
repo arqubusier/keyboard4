@@ -359,7 +359,7 @@ module main_switch_clearance() {
     switch_depth = 8;
     matrix_rep(row_numbers, column_radius, matrix_offs,false)
         translate([0,0,height/2 - switch_depth/2])
-            cube([10,10,switch_depth],center=true);
+            cube([10,9,switch_depth],center=true);
 }
 
 module main_keys_excess() {
@@ -629,6 +629,8 @@ module usb_hole(data) {
     usb_holder_screws(usb_a_data);
     usb_holder_screws(usb_bmini_data);
 }
+
+switch();
 
 translate([0,0,-bottom_height]) {
 	plate0();
