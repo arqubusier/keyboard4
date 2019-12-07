@@ -7,12 +7,12 @@ include <../switcholder/cherrymx.scad>
 /*****************************************************************************/
 main_max_x = 73;
 
-thumb_back_middle_p = [25,-43];
-thumb_middle0_out_p = [-30,-10];
-thumb_middle1_out_p = [-10,-35];
-thumb_front_out_p = [-40,2];
-thumb_back_out_p = [-9,-52];
-thumb_front_middle_p = [-10,25];
+thumb_back_middle_p = [35,-43];
+thumb_middle0_out_p = [-18,-28];
+thumb_middle1_out_p = [-3,-46];
+thumb_front_out_p = [-34,-16];
+thumb_back_out_p = [2,-62];
+thumb_front_middle_p = [-10,0];
 thumb_front_in_p = [73,42];
 thumb_back_in_p = [73,11];
 
@@ -178,7 +178,7 @@ module thumb_row_rep(out_angle, flatness_angle, in_offs, up_offs, forward_offs, 
 module thumb_pos() {
     translate(common_offset)
         rotate(common_rotate_y, [0,1,0])
-            translate([-2 -0.5*switch_side_outer, -23, 0.2-1.5*switch_side_outer - 0.5*height])
+            translate([+4.5 -0.5*switch_side_outer, -40, 0.2-1.5*switch_side_outer - 0.5*height])
                 rotate(-13, v=[1,0,0])
                     children();
 }
@@ -192,13 +192,13 @@ module thumb_front_row(in_offs) {
 module thumb_middle_row(in_offs) {
     thumb_pos()
         thumb_row_rep( thumb_out_angle, thumb_flattness_angle,
-                        in_offs, 0.1, -0.5*switch_side_outer, 2)
+                        in_offs, 3, -0.5*switch_side_outer, 2)
                         children();
 }
 module thumb_back_row(in_offs) {
     thumb_pos()
         thumb_row_rep( thumb_out_angle - 10, thumb_flattness_angle,
-                        in_offs+thumb_height_diff-1, -0.9, 3 + -2*switch_side_outer, 2)
+                        in_offs+thumb_height_diff+3, 6, -10.5 -1*switch_side_outer, 2)
                         children();
 }
 
@@ -319,7 +319,7 @@ module thumb_keys_excess() {
 /*****************************************************************************/
 
 main_side0 = [[main_max_x, 60], [main_max_x,-45]];
-main_corners = [ [-0,-15], [-13,35], [-3,60], main_side0[0], main_side0[1] , [20,-45] ] ;
+main_corners = [ [-9,-15], [-9,35], [-3,60], main_side0[0], main_side0[1] , [20,-45] ] ;
 row_numbers = [4,5,5,5,4];
 matrix_offs = [0,0,2];
 
@@ -329,7 +329,7 @@ module main_outer() {
 	matrix_rep(row_numbers, column_radius, matrix_offs, false)
 	    switch_pos();
 
-        #bottom_plate(inset_height_outer, main_corners, corner_radius);
+        bottom_plate(inset_height_outer, main_corners, corner_radius);
     }
 }
 
@@ -629,8 +629,6 @@ module usb_hole(data) {
     usb_holder_screws(usb_a_data);
     usb_holder_screws(usb_bmini_data);
 }
-
-switch();
 
 translate([0,0,-bottom_height]) {
 	plate0();
