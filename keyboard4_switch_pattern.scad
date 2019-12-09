@@ -5,13 +5,14 @@ include <../switcholder/cherrymx.scad>
         Parameters
 
 /*****************************************************************************/
-main_max_x = 73;
+main_max_x = 77;
+main_max_y = 50;
 
 thumb_back_middle_p = [35,-43];
-thumb_middle0_out_p = [-18,-28];
-thumb_middle1_out_p = [-3,-46];
-thumb_front_out_p = [-34,-16];
-thumb_back_out_p = [2,-62];
+thumb_middle0_out_p = [-18,-30];
+thumb_middle1_out_p = [+1,-46];
+thumb_front_out_p = [-30,-17];
+thumb_back_out_p = [5,-63];
 thumb_front_middle_p = [-10,0];
 thumb_front_in_p = [73,42];
 thumb_back_in_p = [73,11];
@@ -112,11 +113,11 @@ module matrix_rep(row_numbers, radius, offs, columnHull) {
         column_y_offsets = [0,4,9,4,-9];
         column_z_offsets = [0,0,-4,0,7];
         column_angle = 17;
-        column_angle_offset = [2,0,0,0,column_angle/2];
+        column_angle_offset = [2,0,0,0,0];
         column_x_sep = 0;
 
 
-    translate(common_offset) {
+    translate(common_offset + [0,0,-8]) {
         rotate(common_rotate_y, [0,1,0]) {
             for (col_i = [0:n_columns-1]) {
                 if (columnHull) {
@@ -178,7 +179,7 @@ module thumb_row_rep(out_angle, flatness_angle, in_offs, up_offs, forward_offs, 
 module thumb_pos() {
     translate(common_offset)
         rotate(common_rotate_y, [0,1,0])
-            translate([+4.5 -0.5*switch_side_outer, -40, 0.2-1.5*switch_side_outer - 0.5*height])
+            translate([+8 -0.5*switch_side_outer, -40, 0.2-1.5*switch_side_outer - 0.5*height])
                 rotate(-13, v=[1,0,0])
                     children();
 }
@@ -192,13 +193,13 @@ module thumb_front_row(in_offs) {
 module thumb_middle_row(in_offs) {
     thumb_pos()
         thumb_row_rep( thumb_out_angle, thumb_flattness_angle,
-                        in_offs, 3, -0.5*switch_side_outer, 2)
+                        in_offs, 4.5, -0.5*switch_side_outer, 2)
                         children();
 }
 module thumb_back_row(in_offs) {
     thumb_pos()
         thumb_row_rep( thumb_out_angle - 10, thumb_flattness_angle,
-                        in_offs+thumb_height_diff+3, 6, -10.5 -1*switch_side_outer, 2)
+                        in_offs+thumb_height_diff+3, 7, -10.5 -1*switch_side_outer, 2)
                         children();
 }
 
@@ -318,9 +319,9 @@ module thumb_keys_excess() {
 
 /*****************************************************************************/
 
-main_side0 = [[main_max_x, 60], [main_max_x,-45]];
-main_corners = [ [-9,-15], [-9,35], [-3,60], main_side0[0], main_side0[1] , [20,-45] ] ;
-row_numbers = [4,5,5,5,4];
+main_side0 = [[main_max_x, main_max_y], [main_max_x,-45]];
+main_corners = [ [-9,-15], [-9,25], [-3,main_max_y], main_side0[0], main_side0[1] , [20,-45] ] ;
+row_numbers = [3,4,4,4,4];
 matrix_offs = [0,0,2];
 
 module main_outer() {
@@ -379,11 +380,11 @@ module main_keys_excess() {
 
 /*****************************************************************************/
 
-main_side_split_p0 = split_side_point(main_side0, 0.5);
+main_side_split_p0 = split_side_point(main_side0, 0.56);
 plate0_screws = [thumb_front_out_p, thumb_front_middle_p, main_side_split_p0,
 			main_corners[3], main_corners[2]]; 
 
-main_side_split_p1 = split_side_point(main_side0, 0.7);
+main_side_split_p1 = split_side_point(main_side0, 0.79);
 plate1_screws = [thumb_back_middle_p, main_side_split_p1, thumb_middle1_out_p, main_corners[4]]; 
 
 module insets_pos() {
@@ -411,7 +412,7 @@ module full_plate() {
 }
 bigvalue=200;
 plate_chamfer_angle=45;
-plate_offs_y=-5;
+plate_offs_y=-11;
 
 screw_diameter = 3;
 screw_head_diameter = 5.45 + 1;
@@ -421,11 +422,14 @@ module screw_hole() {
 
 module plate1() {
 	hand_rest_length = 95;
-	hand_rest_height = 30;
+	hand_rest_height = 22;
 	hand_rest_p0 = main_corners[4] - [-30,hand_rest_length];
-	hand_rest_p1 = main_corners[5] - [0,hand_rest_length];
+	hand_rest_p1 = main_corners[5] - [-15,hand_rest_length];
+	hand_rest_middle0 = main_corners[4] + [20,-30];
+	hand_rest_middle1 = main_corners[5] + [30,-30];
 	hand_rest_corners = [thumb_back_out_p, main_corners[5], main_corners[4],
-				, hand_rest_p0, hand_rest_p1];
+				, hand_rest_middle0, hand_rest_p0, hand_rest_p1];
+
 	difference() {
         union() {
             bottom_plate(bottom_height, hand_rest_corners, corner_radius);
@@ -441,10 +445,8 @@ module plate1() {
 		}
 	}
 
-	hand_rest_middle0 = split_side_point([hand_rest_p0, main_corners[4]], 0.7);
-	hand_rest_middle1 = split_side_point([hand_rest_p1, main_corners[5]], 0.7);
 	bottom_plate(hand_rest_height,
-			[hand_rest_middle0, hand_rest_middle1+[25,0], hand_rest_p1+[15,0], hand_rest_p0],
+			[hand_rest_middle0, hand_rest_middle1, hand_rest_p1, hand_rest_p0],
 			corner_radius);
 }
 
@@ -508,8 +510,8 @@ usb_a_data = [
     ["hole_side_offset", 1.1],
     ["hole_front_offset", 0.8],
     ["hole_radius", 1.75],
-    ["depth_connections", 4],
-    ["width_connections", 14],
+    ["depth_connections", 15],
+    ["width_connections", 17],
     ["connector_overhang", 2.7],
     ["pcb_height", 1.7],
 ];
@@ -604,7 +606,7 @@ module usb_hole(data) {
 /*****************************************************************************/
 
 
-!difference() {
+difference() {
     union() {
         difference() {
             union() {
@@ -631,6 +633,6 @@ module usb_hole(data) {
 }
 
 translate([0,0,-bottom_height]) {
-	plate0();
-	plate1();
+	*plate0();
+	*plate1();
 }
