@@ -5,17 +5,17 @@ include <../switcholder/cherrymx.scad>
         Parameters
 
 /*****************************************************************************/
-main_max_x = 77;
-main_max_y = 50;
+main_max_x = 78;
+main_max_y = 52;
 
-thumb_back_middle_p = [35,-43];
+thumb_back_middle_p = [39,-43];
 thumb_middle0_out_p = [-18,-30];
 thumb_middle1_out_p = [+1,-46];
-thumb_front_out_p = [-30,-17];
-thumb_back_out_p = [5,-63];
-thumb_front_middle_p = [-10,0];
-thumb_front_in_p = [73,42];
-thumb_back_in_p = [73,11];
+thumb_front_out_p = [-30,-13];
+thumb_back_out_p = [5,-65];
+thumb_front_middle_p = [-10,5];
+thumb_front_in_p = [73,-12];
+thumb_back_in_p = [73,41];
 
 /******************************************************************************
 
@@ -108,22 +108,22 @@ column_radii = 72;
 // Main part
 column_radius = 72;
 
-module matrix_rep(row_numbers, radius, offs, columnHull) {
+module matrix_rep(row_numbers, radius, offs, columnHull, switch_side) {
         n_columns=5;
         column_y_offsets = [0,4,9,4,-9];
         column_z_offsets = [0,0,-4,0,7];
-        column_angle = 17;
+        column_angle = 18;
         column_angle_offset = [2,0,0,0,0];
         column_x_sep = 0;
 
 
-    translate(common_offset + [0,0,-8]) {
+    translate(common_offset + [0,0,-7]) {
         rotate(common_rotate_y, [0,1,0]) {
             for (col_i = [0:n_columns-1]) {
                 if (columnHull) {
                     hull() {
                     translate(offs)
-                        translate([col_i*(column_x_sep + switch_side_outer),
+                        translate([col_i*(column_x_sep + switch_side),
                             column_y_offsets[col_i], column_z_offsets[col_i]])
                                     column_rep(row_numbers[col_i],radius,column_angle_offset[col_i],
                                             column_angle)
@@ -131,7 +131,7 @@ module matrix_rep(row_numbers, radius, offs, columnHull) {
                     }
                 } else {
                     translate(offs)
-                        translate([col_i*(column_x_sep + switch_side_outer),
+                        translate([col_i*(column_x_sep + switch_side),
                             column_y_offsets[col_i], column_z_offsets[col_i]])
                                     column_rep(row_numbers[col_i],radius,column_angle_offset[col_i],
                                             column_angle)
@@ -244,6 +244,7 @@ module thumb_body (_corner_radius) {
             children();
         bottom_plate(inset_height_outer,
              [
+            thumb_front_in_p,
             thumb_back_in_p,
             thumb_front_middle_p,
             thumb_front_out_p,
@@ -269,6 +270,7 @@ module thumb_body (_corner_radius) {
         bottom_plate(inset_height_outer,
              [
             thumb_front_in_p,
+            thumb_back_in_p,
             thumb_back_middle_p,
             thumb_back_out_p,
             thumb_middle1_out_p,
@@ -319,6 +321,7 @@ module thumb_keys_excess() {
 
 /*****************************************************************************/
 
+main_switch_side = switch_side_outer + 0.3;
 main_side0 = [[main_max_x, main_max_y], [main_max_x,-45]];
 main_corners = [ [-9,-15], [-9,25], [-3,main_max_y], main_side0[0], main_side0[1] , [20,-45] ] ;
 row_numbers = [3,4,4,4,4];
@@ -327,9 +330,8 @@ matrix_offs = [0,0,2];
 module main_outer() {
     //outer body
     hull(){
-	matrix_rep(row_numbers, column_radius, matrix_offs, false)
-	    switch_pos();
-
+	matrix_rep(row_numbers, column_radius, matrix_offs, false, main_switch_side)
+	    switch_pos(main_switch_side);
         bottom_plate(inset_height_outer, main_corners, corner_radius);
     }
 }
@@ -337,7 +339,7 @@ module main_outer() {
 module main_inner() {
     //inner body
     hull(){
-	matrix_rep(row_numbers, column_radius, matrix_offs,false)
+	matrix_rep(row_numbers, column_radius, matrix_offs,false, main_switch_side)
 	    switch_neg(1);
 
 	bottom_plate(inset_height_outer, main_corners, corner_radius_inner);
@@ -348,9 +350,9 @@ module main_keys() {
     // Connected Switch holes with excess above
     difference() {
         hull()
-    	matrix_rep(row_numbers, column_radius, matrix_offs,true)
-    	    switch_pos();
-        matrix_rep(row_numbers, column_radius - height, matrix_offs,false)
+    	matrix_rep(row_numbers, column_radius, matrix_offs,true, main_switch_side)
+    	    switch_pos(main_switch_side);
+        matrix_rep(row_numbers, column_radius - height, matrix_offs,false, main_switch_side)
     	switch_neg(10);
     }
 
@@ -358,7 +360,7 @@ module main_keys() {
 
 module main_switch_clearance() {
     switch_depth = 8;
-    matrix_rep(row_numbers, column_radius, matrix_offs,false)
+    matrix_rep(row_numbers, column_radius, matrix_offs,false, main_switch_side)
         translate([0,0,height/2 - switch_depth/2])
             cube([10,9,switch_depth],center=true);
 }
@@ -367,8 +369,8 @@ module main_keys_excess() {
     row_numbers_minus = row_numbers + [2,2,2,2,2];
     // Trim excess above switch holes
     for (i = [1:1]) {
-        matrix_rep(row_numbers_minus, column_radius - i*height, matrix_offs + [0,0,i*height],true)
-            switch_pos();
+        matrix_rep(row_numbers_minus, column_radius - i*height, matrix_offs + [0,0,i*height],true, main_switch_side)
+            switch_pos(main_switch_side);
     }
 
 }
@@ -380,11 +382,11 @@ module main_keys_excess() {
 
 /*****************************************************************************/
 
-main_side_split_p0 = split_side_point(main_side0, 0.56);
+main_side_split_p0 = split_side_point(main_side0, 0.57);
 plate0_screws = [thumb_front_out_p, thumb_front_middle_p, main_side_split_p0,
 			main_corners[3], main_corners[2]]; 
 
-main_side_split_p1 = split_side_point(main_side0, 0.79);
+main_side_split_p1 = split_side_point(main_side0, 0.798);
 plate1_screws = [thumb_back_middle_p, main_side_split_p1, thumb_middle1_out_p, main_corners[4]]; 
 
 module insets_pos() {
@@ -412,7 +414,7 @@ module full_plate() {
 }
 bigvalue=200;
 plate_chamfer_angle=45;
-plate_offs_y=-11;
+plate_offs_y=-9;
 
 screw_diameter = 3;
 screw_head_diameter = 5.45 + 1;
@@ -473,6 +475,7 @@ module plate0() {
             translate(p)
                 cylinder(d=screw_head_diameter,h=bottom_height);
         }
+        controller_clearance();
 	}
 }
 
@@ -506,7 +509,7 @@ usb_a_data = [
     ["holder_width", 26],
     ["holder_depth", 20.16],
     ["holder_height", 2],
-    ["holder_side_offset", 10],
+    ["holder_side_offset", 33],
     ["hole_side_offset", 1.1],
     ["hole_front_offset", 0.8],
     ["hole_radius", 1.75],
@@ -526,7 +529,7 @@ usb_bmicro_data = [
     ["connector_width", 8.0],
     ["holder_width", 21],
     ["holder_depth", 11.4],
-    ["holder_side_offset", 10],
+    ["holder_side_offset", 35],
     ["hole_side_offset", 1.1],
     ["hole_front_offset", 0.9],
     ["hole_radius", 1.75],
@@ -542,7 +545,7 @@ usb_bmini_data = [
     ["connector_width", 7.7],
     ["holder_depth", 19.2],
     ["holder_width", 26],
-    ["holder_side_offset", 40],
+    ["holder_side_offset", 5],
     ["hole_side_offset", 1.1],
     ["hole_front_offset", 0.7],
     ["hole_radius", 1.75],
@@ -580,25 +583,42 @@ module usb_holder(data) {
 }
 
 module usb_hole(data) {
-    tolerance = 0.4;
+    tolerance0 = 0.4;
+    tolerance1 = 1;
     translate(usb_holder_offset(data)) {
-        translate([get(data,"holder_width")/2 - (get(data,"connector_width") + tolerance)/2,
+        translate([get(data,"holder_width")/2 - (get(data,"connector_width") + tolerance0)/2,
                     get(data,"holder_depth")-usb_holder_inset(data),0])
-            cube([get(data,"connector_width") + tolerance, 10,
+            cube([get(data,"connector_width") + tolerance0, 10,
                     get(data,"holder_height")+get(data,"connector_height")+get(data,"pcb_height")]);
-            cube([get(data,"holder_width"), get(data,"holder_depth"), get(data,"holder_height")]);
+        cube([get(data,"holder_width")+tolerance0,
+                get(data,"holder_depth")+tolerance1,
+                get(data,"holder_height")]);
     }
 
-    tolerance1 = 0.3;
+    tolerance2 = 0.3;
     m3_nut_max_w = 6.3;
     m3_nut_h = 2.4;
 
     for (p = usb_screws_pos(data)) {
         translate(p)
-            cylinder(d=m3_nut_max_w+tolerance1,
-                     h=get(data,"holder_height") + m3_nut_h + tolerance1);
+            cylinder(d=m3_nut_max_w+tolerance2,
+                     h=get(data,"holder_height") + m3_nut_h + tolerance2);
     }
 }
+
+/******************************************************************************
+
+		Misc
+
+/*****************************************************************************/
+module controller_clearance() {
+    controller_width=20;
+    controller_length=40;
+    controller_height=15;
+    translate(main_corners[2]+[-1,-controller_length-corner_radius-4,-.5])
+        cube([controller_width,controller_length,controller_height]);
+}
+
 /******************************************************************************
 
 		full model
@@ -626,13 +646,14 @@ difference() {
     main_keys_excess();
     main_switch_clearance();
     insets_neg();
-    usb_hole(usb_a_data);
-    usb_hole(usb_bmini_data);
+    #usb_hole(usb_a_data);
+    #usb_hole(usb_bmini_data);
     usb_holder_screws(usb_a_data);
     usb_holder_screws(usb_bmini_data);
+    #controller_clearance();
 }
 
 translate([0,0,-bottom_height]) {
-	*plate0();
+    *plate0();
 	*plate1();
 }
