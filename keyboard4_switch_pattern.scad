@@ -9,7 +9,7 @@ main_max_x = 78;
 main_max_y = 52;
 
 thumb_back_middle_p = [39,-43];
-thumb_middle0_out_p = [-18,-30];
+thumb_middle0_out_p = [-14,-29];
 thumb_middle1_out_p = [+1,-46];
 thumb_front_out_p = [-30,-13];
 thumb_back_out_p = [5,-65];
@@ -239,7 +239,7 @@ thumb_corners = [ thumb_front_middle_p, thumb_front_out_p,
 
 module thumb_body (_corner_radius) {
     //outer body
-    hull() {
+    #hull() {
         thumb_front_row(0)
             children();
         bottom_plate(inset_height_outer,
@@ -273,7 +273,6 @@ module thumb_body (_corner_radius) {
             thumb_back_in_p,
             thumb_back_middle_p,
             thumb_back_out_p,
-            thumb_middle1_out_p,
               ],
         _corner_radius);
     }
@@ -386,7 +385,7 @@ main_side_split_p0 = split_side_point(main_side0, 0.57);
 plate0_screws = [thumb_front_out_p, thumb_front_middle_p, main_side_split_p0,
 			main_corners[3], main_corners[2]]; 
 
-main_side_split_p1 = split_side_point(main_side0, 0.798);
+main_side_split_p1 = split_side_point(main_side0, 0.796);
 plate1_screws = [thumb_back_middle_p, main_side_split_p1, thumb_middle1_out_p, main_corners[4]]; 
 
 module insets_pos() {
