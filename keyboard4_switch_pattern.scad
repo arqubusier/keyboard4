@@ -8,14 +8,16 @@ include <../switcholder/cherrymx.scad>
 main_max_x = 78;
 main_max_y = 52;
 
-thumb_back_middle_p = [39,-43];
-thumb_middle0_out_p = [-14,-29];
-thumb_middle1_out_p = [+1,-46];
-thumb_front_out_p = [-30,-13];
-thumb_back_out_p = [5,-65];
+thumb_back_middle_p = [45,-49];
+thumb_middle0_out_p = [-16,-25];
+thumb_middle1_out_p = [-9,-27];
+thumb_middle2_out_p = [+7,-46];
+thumb_front_out_p = [-27,-12.5];
+thumb_back_out_p = [11,-65];
 thumb_front_middle_p = [-10,5];
-thumb_front_in_p = [73,-12];
-thumb_back_in_p = [73,41];
+thumb_front_in_p = [73,-35];
+thumb_middle_in_p = [73,10];
+thumb_back_in_p = [73,40];
 
 /******************************************************************************
 
@@ -179,7 +181,7 @@ module thumb_row_rep(out_angle, flatness_angle, in_offs, up_offs, forward_offs, 
 module thumb_pos() {
     translate(common_offset)
         rotate(common_rotate_y, [0,1,0])
-            translate([+8 -0.5*switch_side_outer, -40, 0.2-1.5*switch_side_outer - 0.5*height])
+            translate([+12.5 -0.5*switch_side_outer, -39, .8-1.5*switch_side_outer - 0.5*height])
                 rotate(-13, v=[1,0,0])
                     children();
 }
@@ -193,13 +195,13 @@ module thumb_front_row(in_offs) {
 module thumb_middle_row(in_offs) {
     thumb_pos()
         thumb_row_rep( thumb_out_angle, thumb_flattness_angle,
-                        in_offs, 4.5, -0.5*switch_side_outer, 2)
+                        in_offs, 5, -0.5*switch_side_outer, 2)
                         children();
 }
 module thumb_back_row(in_offs) {
     thumb_pos()
         thumb_row_rep( thumb_out_angle - 10, thumb_flattness_angle,
-                        in_offs+thumb_height_diff+3, 7, -10.5 -1*switch_side_outer, 2)
+                        in_offs+thumb_height_diff+3, 7.5, -10.5 -1*switch_side_outer, 2)
                         children();
 }
 
@@ -244,7 +246,7 @@ module thumb_body (_corner_radius) {
             children();
         bottom_plate(inset_height_outer,
              [
-            thumb_front_in_p,
+            thumb_middle_in_p,
             thumb_back_in_p,
             thumb_front_middle_p,
             thumb_front_out_p,
@@ -259,12 +261,12 @@ module thumb_body (_corner_radius) {
              [
             thumb_back_in_p,
             thumb_front_in_p,
-            thumb_middle0_out_p,
             thumb_middle1_out_p,
+            thumb_middle2_out_p,
               ],
             _corner_radius);
     }
-    hull() {
+    #hull() {
         thumb_back_row(0)
             children();
         bottom_plate(inset_height_outer,
@@ -273,6 +275,7 @@ module thumb_body (_corner_radius) {
             thumb_back_in_p,
             thumb_back_middle_p,
             thumb_back_out_p,
+            thumb_middle2_out_p,
               ],
         _corner_radius);
     }
