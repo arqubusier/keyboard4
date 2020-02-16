@@ -237,9 +237,9 @@ module bottom_plate(height, points, r) {
 
 /*****************************************************************************/
 
-thumb_corners = [ thumb_front_middle_p, thumb_front_out_p,
+thumb_corners = [ thumb_back_in_p1,  thumb_front_middle_p, thumb_front_out_p,
                     thumb_middle0_out_p, thumb_middle1_out_p,
-                    thumb_back_out_p, thumb_back_middle_p ];
+                    thumb_back_out_p, thumb_back_middle_p, thumb_front_in_p];
 
 module thumb_body (_corner_radius) {
     //outer body
@@ -327,7 +327,7 @@ module thumb_keys_excess() {
 
 main_switch_side = switch_side_outer + 0.3;
 main_side0 = [[main_max_x, main_max_y], [main_max_x,-45]];
-main_corners = [ [0,-15], [10,05], [-3,main_max_y], main_side0[0], main_side0[1] , [20,-45] ] ;
+main_corners = [ [0,-15], [0,05], [-3,main_max_y], main_side0[0], main_side0[1] , [20,-45] ] ;
 row_numbers = [3,4,4,4,4];
 matrix_offs = [0,0,2];
 
@@ -479,7 +479,7 @@ module plate0() {
             translate(p)
                 cylinder(d=screw_head_diameter,h=bottom_height);
         }
-        translate([0,0,bottom_height-0.5])
+        translate([3,0,bottom_height-0.5])
             controller_clearance();
 	}
 }
@@ -632,7 +632,7 @@ module controller_clearance() {
 /*****************************************************************************/
 
 
-!difference() {
+difference() {
     union() {
         difference() {
             union() {
@@ -663,6 +663,17 @@ module controller_clearance() {
 }
 
 translate([0,0,-bottom_height]) {
-    *plate0();
-	*plate1();
+    !plate0();
+	plate1();
+*screw_hole();
+
+*thumb_front_row(0)
+*    switch();
+*thumb_middle_row(0)
+*    switch();
+*thumb_back_row(0)
+*    switch();
+*
+*matrix_rep(row_numbers, column_radius, matrix_offs,false, main_switch_side)
+*    	    switch(main_switch_side);
 }
